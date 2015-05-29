@@ -24,11 +24,6 @@ public class Game
       createGamePanel();
       createGameLoop();      
    }
-
-   public Renderer getRenderer()
-   {
-      return (renderer);
-   }
    
    public static void add(Scene scene)
    {
