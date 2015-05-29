@@ -1,0 +1,5 @@
+<animationMap>
+   <frame x="0" y="0" height = "56" width = "70" columns = "5"/>
+   <animation id="idle" startFrame = "0" endFrame = "0"/>
+   <animation id="walk" startFrame = "0" endFrame = "3"/>
+</animationMap>

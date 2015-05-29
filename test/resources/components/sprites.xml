@@ -1,0 +1,4 @@
+<root>
+    <sprite id="sprite_00"/>
+    <sprite id="sprite_01" code="com.toast.game.engine.component.Sprite"/>
+</root>
