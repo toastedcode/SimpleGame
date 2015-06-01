@@ -2,6 +2,7 @@ package com.toast.game.engine;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Point;
 
 import javax.swing.JFrame;
 
@@ -10,6 +11,7 @@ import com.toast.game.engine.property.Animation;
 import com.toast.game.engine.property.Animation.AnimationDirection;
 import com.toast.game.engine.property.Animation.AnimationType;
 import com.toast.game.engine.property.Image;
+import com.toast.game.engine.property.Path;
 import com.toast.game.engine.property.Physics;
 import com.toast.game.engine.property.Script;
 import com.toast.swing.Resource;
@@ -47,6 +49,7 @@ public class PacMan
       // Boxy
       
       Actor boxy = new Actor("boxy");
+      boxy.setZOrder(1);
       
       Animation idleAnim = new Animation("walk", 
                                          Resource.getImage("/resources/images/boxy.png"),
@@ -56,7 +59,12 @@ public class PacMan
       idleAnim.start(AnimationType.LOOP, AnimationDirection.FORWARD);
       boxy.add(idleAnim);
       
-      boxy.setZOrder(1);
+      Path path = new Path("path", new Point(0, 0), new Point(50, 50), new Point(100, 50));
+      path.setFollowing(true);
+      path.setFollowType(Path.FollowType.LOOP);
+      path.setSpeed(80);
+      boxy.add(path);
+      
       levelOne.add(boxy);
 
       frame.getContentPane().add(Game.getGamePanel(), BorderLayout.CENTER);
