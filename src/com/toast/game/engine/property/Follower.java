@@ -1,20 +1,14 @@
 package com.toast.game.engine.property;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.geom.Point2D;
-import java.util.Arrays;
-import java.util.List;
 
 import com.toast.game.common.Vector2D;
-import com.toast.game.engine.Actor;
-import com.toast.game.engine.interfaces.Drawable;
+import com.toast.game.engine.actor.Actor;
+import com.toast.game.engine.actor.Path;
 import com.toast.game.engine.interfaces.Updatable;
-import com.toast.game.engine.property.Animation.AnimationDirection;
 
-public class Path extends Property implements Updatable, Drawable
+public class Follower extends Property implements Updatable
 {
    public enum FollowType
    {
@@ -42,18 +36,27 @@ public class Path extends Property implements Updatable, Drawable
       private int increment;
    }
    
-   public Path(String id, List<Point> waypoints)
+   public Follower(String id)
    {
       super(id);
-      
-      this.waypoints = waypoints; 
    }
    
-   public Path(String id, Point ... waypoints)
+   public void follow(Path path, FollowType followType, FollowDirection followDirection, int speed)
    {
-      super(id);
+      this.path = path;
+      this.followDirection = followDirection;
+      this.followType = followType;
+      this.speed = speed;
+      isFollowing = true;
       
-      this.waypoints = Arrays.asList(waypoints); 
+      if (followDirection == FollowDirection.FORWARD)
+      {
+         waypointIndex = getStartWaypointIndex();
+      }
+      else
+      {
+         waypointIndex = getEndWaypointIndex();
+      }
    }
    
    public int getWaypointIndex()
@@ -107,54 +110,14 @@ public class Path extends Property implements Updatable, Drawable
    }
 
    @Override
-   public void draw(Graphics graphics)
-   {
-      final int RADIUS = 5;
-      
-      graphics.setColor(Color.WHITE);
-      
-      for (int i = 0; i < waypoints.size(); i++)
-      {
-         Point waypoint = waypoints.get(i);
-         
-         // Draw points.
-         graphics.drawOval((int)(waypoint.getX() - RADIUS), (int)(waypoint.getY() - RADIUS), (RADIUS * 2), (RADIUS * 2));
-         
-         // Draw lines.
-         if (i < (waypoints.size() - 1))
-         {
-            Point nextWaypoint = waypoints.get(i + 1);
-            graphics.drawLine((int)waypoint.getX(), (int)waypoint.getY(),  (int)nextWaypoint.getX(), (int)nextWaypoint.getY());
-         }
-      }
-   }
-
-   @Override
-   public int getWidth()
-   {
-      return ((int)dimension.getWidth());
-   }
-
-   @Override
-   public int getHeight()
-   {
-      return ((int)dimension.getHeight());
-   }
-
-   @Override
-   public boolean isVisible()
-   {
-      return (isVisible);
-   }
-
-   @Override
    public void update(long elapsedTime)
    {
       Actor parent = getParent();
    
       if ((parent != null) &&
           (isFollowing == true) &&
-          (waypointIndex < waypoints.size()))
+          (path != null) &&
+          (waypointIndex < path.getSize()))
       {
          Vector2D translation = getTranslation(elapsedTime);
          parent.moveBy(translation.x, translation.y);
@@ -174,7 +137,7 @@ public class Path extends Property implements Updatable, Drawable
    
    private int getEndWaypointIndex()
    {
-      return (waypoints.size() - 1);
+      return (path.getSize() - 1);
    }
    
    private int getNextWaypointIndex()
@@ -200,7 +163,7 @@ public class Path extends Property implements Updatable, Drawable
             }
             else
             {
-               nextIndex = (nextIndex < getEndWaypointIndex()) ? getEndWaypointIndex() : nextIndex;               
+               nextIndex = (nextIndex < getStartWaypointIndex()) ? getStartWaypointIndex() : nextIndex;               
             }
             break;
          }
@@ -263,7 +226,7 @@ public class Path extends Property implements Updatable, Drawable
       //
       
       Point2D.Double position = getParent().getPosition();
-      Point waypoint = waypoints.get(waypointIndex);
+      Point waypoint = path.getWaypoint(waypointIndex);
       Point2D.Double projectedPosition = new Point2D.Double((position.getX() + translation.x), 
                                                             (position.getY() + translation.y)); 
       
@@ -285,11 +248,11 @@ public class Path extends Property implements Updatable, Drawable
       Vector2D velocity = new Vector2D(0.0, 0.0);
       
       // Validate the current waypoint.
-      if ((waypoints.isEmpty() == false) &&
+      if ((path.getSize() > 0) &&
           (waypointIndex >= 0) &&
-          (waypointIndex < waypoints.size()))
+          (waypointIndex < path.getSize()))
       {
-         velocity = Vector2D.multiply(Vector2D.subtract(new Vector2D(waypoints.get(waypointIndex)),
+         velocity = Vector2D.multiply(Vector2D.subtract(new Vector2D(path.getWaypoint(waypointIndex)),
                                                         new Vector2D(getParent().getPosition())).getNormalized(),
                                                         (double)speed);
       }
@@ -306,10 +269,10 @@ public class Path extends Property implements Updatable, Drawable
       
       // Validate the current waypoint.
       if ((waypointIndex >= 0) &&
-          (waypointIndex < waypoints.size()))
+          (waypointIndex < path.getSize()))
       {
          // Determine if the parent is "close enough" to the current waypoint.
-         hasReachedWaypoint = (getParent().getPosition().distance(waypoints.get(waypointIndex)) < WAYPOINT_THRESHOLD);
+         hasReachedWaypoint = (getParent().getPosition().distance(path.getWaypoint(waypointIndex)) < WAYPOINT_THRESHOLD);
       }
     
       return (hasReachedWaypoint);
@@ -323,9 +286,9 @@ public class Path extends Property implements Updatable, Drawable
       {
          validatedIndex = 0;
       }
-      else if (validatedIndex > (waypoints.size() - 1))
+      else if (validatedIndex > (path.getSize() - 1))
       {
-         validatedIndex = (waypoints.size() - 1);
+         validatedIndex = (path.getSize() - 1);
       }
       
       return (validatedIndex);
@@ -335,13 +298,9 @@ public class Path extends Property implements Updatable, Drawable
    // A constant specifying the number of milliseconds in a second.
    private static final int MILLISECONDS_PER_SECOND = 1000;  
    
-   private List<Point> waypoints;
-   
-   Dimension dimension = new Dimension(0, 0);
+   private Path path;
    
    private int waypointIndex = 0;
-   
-   private boolean isVisible = true;
    
    private boolean isFollowing = true;
    

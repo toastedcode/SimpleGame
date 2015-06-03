@@ -2,17 +2,24 @@ package com.toast.game.engine;
 
 import java.awt.Graphics;
 import java.util.Map;
+
 import javax.swing.JPanel;
 
+import com.toast.game.engine.message.Messenger;
 import com.toast.xml.XmlNode;
 
 public class Game
 {
+   // **************************************************************************
+   //                             Public operations
+   // **************************************************************************
+   
    public static void create(String title, int width, int height, int layers)
    {
       Game.title = title;
       
       createRenderer(width, height, layers);
+      createMessenger();
       createGamePanel();
       createGameLoop();      
    }
@@ -40,6 +47,11 @@ public class Game
       currentScene = scene;
    }
    
+   public static Messenger getMessenger()
+   {
+      return (messenger);
+   }
+   
    public static JPanel getGamePanel()
    {
       return (gamePanel);
@@ -61,9 +73,18 @@ public class Game
       return (isPaused);
    }
    
+   // **************************************************************************
+   //                             Private operations
+   // **************************************************************************
+   
    private static void createRenderer(int width, int height, int layers)
    {
       renderer = new Renderer(width, height, layers);
+   }
+   
+   private static void createMessenger()
+   {
+      messenger = new Messenger();
    }
    
    @SuppressWarnings("serial")
@@ -157,6 +178,8 @@ public class Game
    private static JPanel gamePanel;
    
    private static Renderer renderer;
+   
+   private static Messenger messenger;
    
    private static Map<String, Scene> scenes;
    

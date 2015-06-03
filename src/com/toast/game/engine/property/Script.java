@@ -21,7 +21,7 @@ public class Script extends Property implements Drawable, Updatable
    {
       INIT("initialize"),
       UPDATE("update"),
-      HANDLE_EVENT("handleEvent"),
+      HANDLE_MESSAGE("handleMessage"),
       DESTROY("destroy"),
       DRAW("draw");
       
@@ -160,7 +160,7 @@ public class Script extends Property implements Drawable, Updatable
                new Script.Variable("actor", getParent()), 
                new Script.Variable("elapsedTime", elapsedTime));
    }
-   
+
    private Interpreter interpreter = new Interpreter();
    
    private boolean isValid;

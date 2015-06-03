@@ -7,11 +7,15 @@ import java.awt.Point;
 import javax.swing.JFrame;
 
 import com.toast.game.common.Vector2D;
+import com.toast.game.engine.actor.Actor;
+import com.toast.game.engine.actor.Path;
 import com.toast.game.engine.property.Animation;
 import com.toast.game.engine.property.Animation.AnimationDirection;
 import com.toast.game.engine.property.Animation.AnimationType;
+import com.toast.game.engine.property.Follower.FollowDirection;
+import com.toast.game.engine.property.Follower;
+import com.toast.game.engine.property.Follower.FollowType;
 import com.toast.game.engine.property.Image;
-import com.toast.game.engine.property.Path;
 import com.toast.game.engine.property.Physics;
 import com.toast.game.engine.property.Script;
 import com.toast.swing.Resource;
@@ -45,6 +49,12 @@ public class PacMan
       jason.add(script);
 
       levelOne.add(jason);
+      
+      // Path
+      
+      Path path = new Path("boxyPath", new Point(0, 0), new Point(50, 50), new Point(100, 50), new Point(300, 250));
+      path.setVisible(true);
+      levelOne.add(path);
 
       // Boxy
       
@@ -56,14 +66,12 @@ public class PacMan
                                          new AnimationMap(Resource.getXmlDocument("/resources/animations/boxy.anim")),
                                          "walk",
                                           3);
-      idleAnim.start(AnimationType.LOOP, AnimationDirection.FORWARD);
+      idleAnim.start(AnimationType.NORMAL, AnimationDirection.FORWARD);
       boxy.add(idleAnim);
       
-      Path path = new Path("path", new Point(0, 0), new Point(50, 50), new Point(100, 50));
-      path.setFollowing(true);
-      path.setFollowType(Path.FollowType.LOOP);
-      path.setSpeed(80);
-      boxy.add(path);
+      Follower follower = new Follower("follower");
+      follower.follow(path, FollowType.BOUNCE, FollowDirection.FORWARD, 80);
+      boxy.add(follower);
       
       levelOne.add(boxy);
 

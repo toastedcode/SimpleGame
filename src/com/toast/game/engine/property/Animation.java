@@ -8,8 +8,10 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
 import com.toast.game.engine.AnimationMap;
+import com.toast.game.engine.Game;
 import com.toast.game.engine.interfaces.Drawable;
 import com.toast.game.engine.interfaces.Updatable;
+import com.toast.game.engine.message.Message;
 
 public class Animation extends Property implements Updatable, Drawable
 {
@@ -124,12 +126,12 @@ public class Animation extends Property implements Updatable, Drawable
       if ((currentFrame != previousFrame) &&
           (isFinished(currentFrame) == true))
       {
-         // Send the "animation finished" event.
-         /*
-         Event event = new Event("eventAnimationFinished");
-         event.addPayload("animation", animation.getAnimationId());
-         EventManager.sendEvent(event, spriteId);
-         */
+         // Send the "animation finished" message.
+         Message message = new Message("ANIMATION_FINISHED", 
+                                       getParent().getId(), 
+                                       null, 
+                                       new Message.Parameter("animation", this.getId()));
+         Game.getMessenger().sendMessage(message);
       }
    }
    

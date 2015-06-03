@@ -4,6 +4,8 @@ import java.awt.Rectangle;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.toast.game.engine.actor.Actor;
+
 public class Scene
 {
    public Scene(String id)

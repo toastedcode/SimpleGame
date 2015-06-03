@@ -1,4 +1,4 @@
-package com.toast.game.engine;
+package com.toast.game.engine.message;
 
 import java.util.HashMap;
 
@@ -7,6 +7,29 @@ public class Message
    // **************************************************************************
    //                             Public Classes
    // **************************************************************************
+   
+   public static class Parameter
+   {
+      public Parameter(String id, Object parameter)
+      {
+         this.id = id;
+         this.parameter = parameter;
+      }
+      
+      public String getId()
+      {
+         return (id);
+      }
+      
+      public Object getParameter()
+      {
+         return (parameter);
+      }
+      
+      private String id;
+      
+      private Object parameter;
+   }
    
    @SuppressWarnings("serial")
    public class Payload extends HashMap<String, Object>
@@ -26,6 +49,23 @@ public class Message
       this.sourceId = sourceId;
       this.destinationId = destinationId;
       payload = new Payload();
+   }
+   
+   public Message(
+         String messageId,
+         String sourceId,
+         String destinationId,
+         Parameter ... parameters)
+   {
+      this.messageId = messageId;
+      this.sourceId = sourceId;
+      this.destinationId = destinationId;
+      
+      payload = new Payload();
+      for (Parameter parameter : parameters)
+      {
+         payload.put(parameter.getId(), parameter.getParameter());
+      }
    }
    
    public String getMessageId()

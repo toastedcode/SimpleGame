@@ -1,7 +1,7 @@
-package com.toast.game.engine;
+package com.toast.game.engine.actor;
 
+import com.toast.game.engine.Renderer;
 import com.toast.game.engine.interfaces.Drawable;
-import com.toast.game.engine.interfaces.Mailable;
 import com.toast.game.engine.interfaces.Movable;
 import com.toast.game.engine.interfaces.Updatable;
 import com.toast.game.engine.property.Property;
@@ -10,10 +10,11 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Actor implements Updatable, Movable, Mailable
+public class Actor implements Updatable, Movable
 {
    public Actor(String id)
    {
@@ -53,8 +54,17 @@ public class Actor implements Updatable, Movable, Mailable
    
    public Point2D.Double getPosition()
    {
-      // TODO
       return (position);
+   }
+   
+   public boolean isVisible()
+   {
+      return (isVisible);
+   }
+   
+   public void setVisible(boolean isVisible)
+   {
+      this.isVisible = isVisible;
    }
    
    public int getZOrder()
@@ -73,9 +83,14 @@ public class Actor implements Updatable, Movable, Mailable
       return (0);
    }
    
-   public Rectangle getBounds()
+   public Rectangle2D.Double getBounds()
    {
       return (bounds);
+   }
+   
+   protected void setBounds(Rectangle2D.Double bounds)
+   {
+      this.bounds = bounds;
    }
    
    public Dimension getScale()
@@ -114,20 +129,7 @@ public class Actor implements Updatable, Movable, Mailable
       position.setLocation(x, y);
    }
    
-   @Override
-   public void queueMessage(Message message)
-   {
-      for (Property property : properties.values())
-      {
-         // TODO: Make this more OO, please!
-         if (property instanceof Mailable)
-         {
-            ((Mailable)property).queueMessage(message);
-         }
-      }
-   }
-   
-   private AffineTransform getTransform()
+   protected AffineTransform getTransform()
    {
       AffineTransform transform = new AffineTransform();
       transform.translate(getPosition().getX(), getPosition().getY());
@@ -138,6 +140,8 @@ public class Actor implements Updatable, Movable, Mailable
    
    private String id;
    
+   private boolean isVisible = true;
+   
    private int zOrder = 0;
    
    // Temp.
@@ -145,5 +149,5 @@ public class Actor implements Updatable, Movable, Mailable
    
    private Map<String, Property> properties = new HashMap<>();
    
-   private Rectangle bounds = new Rectangle(0, 0, 0, 0);
+   private Rectangle2D.Double bounds = new Rectangle2D.Double(0, 0, 0, 0);
 }

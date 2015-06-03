@@ -1,6 +1,6 @@
 package com.toast.game.engine.property;
 
-import com.toast.game.engine.Actor;
+import com.toast.game.engine.actor.Actor;
 import com.toast.xml.XmlNode;
 
 public class Property

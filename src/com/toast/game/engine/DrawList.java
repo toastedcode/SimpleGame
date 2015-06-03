@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 
+import com.toast.game.engine.actor.Actor;
+
 @SuppressWarnings("serial")
 public class DrawList extends ArrayList<Actor>
 {
