@@ -7,6 +7,7 @@ import com.toast.game.common.Vector2D;
 import com.toast.game.engine.actor.Actor;
 import com.toast.game.engine.actor.Path;
 import com.toast.game.engine.interfaces.Updatable;
+import com.toast.xml.XmlNode;
 
 public class Follower extends Property implements Updatable
 {
@@ -108,6 +109,9 @@ public class Follower extends Property implements Updatable
    {
       this.speed = speed;
    }
+   
+   // **************************************************************************
+   //                          Updatable interface
 
    @Override
    public void update(long elapsedTime)
@@ -128,6 +132,57 @@ public class Follower extends Property implements Updatable
          }
       }
    }
+   
+   // **************************************************************************
+   //                        xml.Serializable interface
+   
+   /*
+   <follower id="">
+      <path></path>
+      <waypointIndex></waypointIndex>
+      <isFollowing></frameRate>
+      <speed></speed>
+      <followDirection></followDirection>
+   </follower>
+   */
+   
+   @Override
+   public String getNodeName()
+   {
+      return("follower");
+   }
+   
+   @Override
+   public XmlNode serialize(XmlNode node)
+   {
+      XmlNode propertyNode = super.serialize(node);
+      
+      path.serialize(propertyNode);
+      
+      // waypointIndex
+      propertyNode.appendChild("waypointIndex",  waypointIndex);
+      
+      // isFollowing
+      propertyNode.appendChild("isFollowing",  isFollowing);
+      
+      // speed
+      propertyNode.appendChild("speed",  isFollowing);
+
+      // followDirection
+      propertyNode.appendChild("followDirection",  followDirection);
+      
+      return (propertyNode);
+   }
+
+   @Override
+   public void deserialize(XmlNode node)
+   {
+      super.deserialize(node);
+   }
+   
+   // **************************************************************************
+   //                                Private
+   // **************************************************************************
    
    private int getStartWaypointIndex()
    {

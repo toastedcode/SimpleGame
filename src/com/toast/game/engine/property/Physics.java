@@ -1,6 +1,7 @@
 package com.toast.game.engine.property;
 
 import com.toast.game.common.Vector2D;
+import com.toast.game.common.XmlUtils;
 import com.toast.game.engine.interfaces.Updatable;
 import com.toast.xml.XmlNode;
 
@@ -14,6 +15,22 @@ public class Physics extends Property implements Updatable
    public Physics(XmlNode node)
    {
       super(node);
+   }
+   
+   public Property clone()
+   {
+      Physics clone = new Physics(getId());
+      
+      clone.isEnabled = isEnabled;
+      clone.mass = mass;
+      clone.setVelocity(velocity);
+      clone.setAcceleration(acceleration);
+      clone.setGravity(gravity);
+      clone.drag = drag;
+      clone.friction = friction;
+      clone.elasticity = elasticity;
+      
+      return (clone);
    }
    
    public boolean isEnabled()
@@ -43,7 +60,7 @@ public class Physics extends Property implements Updatable
 
    public void setVelocity(Vector2D velocity)
    {
-      this.velocity = velocity;
+      this.velocity = velocity.clone();
    }
 
    public Vector2D getAcceleration()
@@ -53,7 +70,7 @@ public class Physics extends Property implements Updatable
 
    public void setAcceleration(Vector2D acceleration)
    {
-      this.acceleration = acceleration;
+      this.acceleration = acceleration.clone();
    }
 
    public Vector2D getGravity()
@@ -63,7 +80,7 @@ public class Physics extends Property implements Updatable
 
    public void setGravity(Vector2D gravity)
    {
-      this.gravity = gravity;
+      this.gravity = gravity.clone();
    }
 
    public double getDrag()
@@ -117,6 +134,92 @@ public class Physics extends Property implements Updatable
       double deltaY = velocity.y * elapsedSeconds;
       
       getParent().moveBy(deltaX, deltaY);
+   }
+   
+   // **************************************************************************
+   //                        xml.Serializable interface
+   
+   /*
+   <motor id="">
+      <keyMap>
+         <key keyId=""></key>
+      </keyMap>
+   </motor>
+   */
+   
+   @Override
+   public String getNodeName()
+   {
+      return("physics");
+   }
+   
+   @Override
+   public XmlNode serialize(XmlNode node)
+   {
+      XmlNode propertyNode = super.serialize(node);
+      
+      // isEnabled
+      propertyNode.appendChild("isEnabled", isEnabled);
+      
+      // mass
+      propertyNode.appendChild("mass", mass);
+      
+      // velocity
+      XmlNode vectorNode = propertyNode.appendChild("velocity");
+      vectorNode.appendChild("x", velocity.x);
+      vectorNode.appendChild("y", velocity.y);
+      
+      // velocity
+      vectorNode = propertyNode.appendChild("acceleration");
+      vectorNode.appendChild("x", acceleration.x);
+      vectorNode.appendChild("y", acceleration.y);
+      
+      // velocity
+      vectorNode = propertyNode.appendChild("gravity");
+      vectorNode.appendChild("x", gravity.x);
+      vectorNode.appendChild("y", gravity.y);
+      
+      // drag
+      propertyNode.appendChild("drag", drag);
+      
+      // friction
+      propertyNode.appendChild("friction", friction);
+      
+      // elasticity
+      propertyNode.appendChild("elasticity", elasticity);
+
+
+      return (propertyNode);
+   }
+
+   @Override
+   public void deserialize(XmlNode node)
+   {
+      super.deserialize(node);
+      
+      // isEnabled
+      isEnabled = node.getChild("isEnabled").getBoolValue();
+      
+      // mass
+      mass = node.getChild("mass").getIntValue();
+      
+      // velocity
+      velocity = XmlUtils.getVector(node.getChild("vecocity"));
+      
+      // acceleration
+      acceleration = XmlUtils.getVector(node.getChild("acceleration"));
+      
+      // gravity
+      gravity = XmlUtils.getVector(node.getChild("gravity"));
+      
+      // drag
+      drag = node.getChild("drag").getIntValue();
+      
+      // friction
+      friction = node.getChild("friction").getIntValue();
+      
+      // elasticity
+      elasticity = node.getChild("elasticity").getIntValue();
    }
    
    // **************************************************************************

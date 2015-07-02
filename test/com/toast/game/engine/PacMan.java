@@ -3,22 +3,31 @@ package com.toast.game.engine;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.image.BufferedImage;
 
 import javax.swing.JFrame;
 
+import com.sun.glass.events.KeyEvent;
 import com.toast.game.common.Vector2D;
 import com.toast.game.engine.actor.Actor;
+import com.toast.game.engine.actor.Generator;
 import com.toast.game.engine.actor.Path;
+import com.toast.game.engine.message.Message;
+import com.toast.game.engine.message.Messenger;
 import com.toast.game.engine.property.Animation;
+import com.toast.game.engine.property.AnimationGroup;
 import com.toast.game.engine.property.Animation.AnimationDirection;
 import com.toast.game.engine.property.Animation.AnimationType;
 import com.toast.game.engine.property.Follower.FollowDirection;
 import com.toast.game.engine.property.Follower;
 import com.toast.game.engine.property.Follower.FollowType;
 import com.toast.game.engine.property.Image;
+import com.toast.game.engine.property.Motor;
 import com.toast.game.engine.property.Physics;
 import com.toast.game.engine.property.Script;
 import com.toast.swing.Resource;
+import com.toast.xml.XmlDocument;
+import com.toast.xml.XmlNode;
 
 public class PacMan
 {
@@ -47,6 +56,14 @@ public class PacMan
       
       Script script = new Script("script", Resource.getFile("/resources/scripts/test.bsh"));
       jason.add(script);
+      
+      jason.setState("highScore",  100);
+      int highScore = (Integer)jason.getState("highScore");
+      System.out.format("Value of jason.highScore: %d\n", highScore);
+      
+      Messenger.register(jason, "msgTEST_BROADCAST");
+      Messenger.register(jason, "msgKEY_PRESSED");
+      Messenger.register(jason, "msgKEY_RELEASED");
 
       levelOne.add(jason);
       
@@ -74,10 +91,84 @@ public class PacMan
       boxy.add(follower);
       
       levelOne.add(boxy);
+      
+      // Rain drop
+      
+      Actor drop = new Actor("drop");
+      drop.add(new Image("rainDrop", Resource.getImage("/resources/images/rain.png")));
+      
+      physics = new Physics("physics");
+      physics.setGravity(new Vector2D(0, 100));
+      drop.add(physics);
+      
+      // Rain cloud
+      
+      Generator cloud = new Generator("cloud");
+      cloud.setFrequency(500);
+      cloud.setActor(drop);
+      cloud.moveTo(300, 300);
+      cloud.add(new Image("rainCloud", Resource.getImage("/resources/images/cloud.png")));
+      
+      script = new Script("rainScript", Resource.getFile("/resources/scripts/cloud.bsh"));
+      cloud.add(script);
+      
+      levelOne.add(cloud);
+      
+      // Pac Man
+      
+      Actor pacMan = new Actor("pacMan");
+      pacMan.moveTo(0, 300);
+      
+      BufferedImage spriteMap = Resource.getImage("/resources/images/pacMan.png");
+      AnimationMap animMap = new AnimationMap(Resource.getXmlDocument("/resources/animations/pacMan.anim"));
+      Animation right = new Animation("right", 
+                                      spriteMap,
+                                      animMap,
+                                      "right",
+                                      10);
+      Animation left = new Animation("left", 
+                                     spriteMap,
+                                     animMap,
+                                     "left",
+                                     10);
+      
+      AnimationGroup animationGroup = new AnimationGroup("pacManAnimations");
+      animationGroup.addAnimation(right);
+      animationGroup.addAnimation(left);
+      animationGroup.setAnimation("right", AnimationType.LOOP, AnimationDirection.FORWARD);
+      
+      pacMan.add(animationGroup);
+      
+      Messenger.register(pacMan, "msgKEY_PRESSED");
+      
+      Motor motor = new Motor("motor");
+      motor.mapKey(KeyEvent.VK_LEFT, Motor.Direction.LEFT);
+      motor.mapKey(KeyEvent.VK_RIGHT, Motor.Direction.RIGHT);
+      motor.mapKey(KeyEvent.VK_UP, Motor.Direction.UP);
+      motor.mapKey(KeyEvent.VK_DOWN, Motor.Direction.DOWN);
+      motor.mapKey(KeyEvent.VK_A, Motor.Direction.LEFT);
+      motor.mapKey(KeyEvent.VK_D, Motor.Direction.RIGHT);
+      motor.mapKey(KeyEvent.VK_W, Motor.Direction.UP);
+      motor.mapKey(KeyEvent.VK_S, Motor.Direction.DOWN);
+
+      pacMan.add(motor);
+      
+      levelOne.add(pacMan);
 
       frame.getContentPane().add(Game.getGamePanel(), BorderLayout.CENTER);
       frame.setVisible(true);
       
+      Game.startTimer("testTimer", 1000, true, new Message("msgTIMEOUT", "testTimer", "jason"));
+      
+      XmlDocument document = new XmlDocument();
+      document.createRootNode("game");
+      XmlNode sceneNode = Game.getCurrentScene().serialize(document.getRootNode());
+      System.out.println(sceneNode.toString());
+      
       Game.play();
+      
+      // TODO: Not a good test because we're sending a message from outside the game loop.
+      Messenger.sendMessage(new Message("msgTEST", "game", "jason"));
+      Messenger.sendMessage(new Message("msgTEST_BROADCAST", "game", null));
    }
 }

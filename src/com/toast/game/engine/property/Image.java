@@ -8,6 +8,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
 import com.toast.game.engine.interfaces.Drawable;
+import com.toast.xml.XmlNode;
 
 public class Image extends Property implements Drawable
 {
@@ -19,29 +20,42 @@ public class Image extends Property implements Drawable
       this.bufferedImage = bufferedImage;
    }
    
+   public Property clone()
+   {
+      Image clone = new Image(getId(), bufferedImage);
+      
+      return (clone);
+   }
+   
+   // **************************************************************************
+   //                           Drawable interface
+   
    @Override
    public void draw(Graphics graphics)
    {
-      Point position = new Point(0, 0);
-      double scale = 1.0;
-      
-      Rectangle sourceRectangle = new Rectangle(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight());
-      
-      Rectangle destinationRectangle = new Rectangle(position,
-                                                     new Dimension((int)(bufferedImage.getWidth() * scale), 
-                                                                   (int)(bufferedImage.getHeight() * scale)));
-      
-      ((Graphics2D)graphics).drawImage(
-         bufferedImage, 
-         destinationRectangle.x, 
-         destinationRectangle.y, 
-         (destinationRectangle.x + destinationRectangle.width), 
-         (destinationRectangle.y + destinationRectangle.height), 
-         sourceRectangle.x, 
-         sourceRectangle.y, 
-         (sourceRectangle.x+ sourceRectangle.width), 
-         (sourceRectangle.y + sourceRectangle.height), 
-         null);  
+      if (isVisible() == true)
+      {
+         Point position = new Point(0, 0);
+         double scale = 1.0;
+         
+         Rectangle sourceRectangle = new Rectangle(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight());
+         
+         Rectangle destinationRectangle = new Rectangle(position,
+                                                        new Dimension((int)(bufferedImage.getWidth() * scale), 
+                                                                      (int)(bufferedImage.getHeight() * scale)));
+         
+         ((Graphics2D)graphics).drawImage(
+            bufferedImage, 
+            destinationRectangle.x, 
+            destinationRectangle.y, 
+            (destinationRectangle.x + destinationRectangle.width), 
+            (destinationRectangle.y + destinationRectangle.height), 
+            sourceRectangle.x, 
+            sourceRectangle.y, 
+            (sourceRectangle.x+ sourceRectangle.width), 
+            (sourceRectangle.y + sourceRectangle.height), 
+            null);
+      }
    }
    
    @Override
@@ -56,14 +70,63 @@ public class Image extends Property implements Drawable
    {
       return (bufferedImage.getHeight());
    }
-   
 
    @Override
    public boolean isVisible()
    {
-      // TODO Auto-generated method stub
-      return false;
-   }   
+      return (isVisible);
+   }
+   
+   @Override
+   public void setVisible(boolean isVisible)
+   {
+      this.isVisible = isVisible;
+   }
+   
+   // **************************************************************************
+   //                        xml.Serializable interface
+   
+   /*
+   <image id="walk">
+      <image></image>
+      <isVisible></isVisible>
+   </animation>
+   */
+   
+   @Override
+   public String getNodeName()
+   {
+      return("image");
+   }
+   
+   @Override
+   public XmlNode serialize(XmlNode node)
+   {
+      XmlNode propertyNode = super.serialize(node);
+      
+      // bufferedImage
+      // TODO: Resource id?
+      propertyNode.appendChild("image", "");
+
+      // isVisible
+      propertyNode.appendChild("isVisible", isVisible);
+      
+      return (propertyNode);
+   }
+
+   @Override
+   public void deserialize(XmlNode node)
+   {
+      super.deserialize(node);
+      
+      // bufferedImage
+      // TODO
+      
+      // isVisible
+      isVisible = node.getChild("isVisible").getBoolValue();
+   }
    
    private final BufferedImage bufferedImage;
+   
+   private boolean isVisible = true;
 }

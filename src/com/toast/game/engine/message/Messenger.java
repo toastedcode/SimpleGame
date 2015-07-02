@@ -9,12 +9,17 @@ import com.toast.game.engine.interfaces.Mailable;
 
 public class Messenger
 {
-   public void register(Mailable mailable)
+   static public void register(Mailable mailable)
    {
       sendMailboxes.put(mailable.getAddress(), mailable);
    }
    
-   public void register(Mailable mailable, String messageId)
+   static public void unregister(Mailable mailable)
+   {
+      sendMailboxes.remove(mailable.getAddress());
+   }
+   
+   static public void register(Mailable mailable, String messageId)
    {
       if (broadcastMailboxes.containsKey(messageId) == false)
       {
@@ -24,7 +29,15 @@ public class Messenger
       broadcastMailboxes.get(messageId).add(mailable);
    }
    
-   public void sendMessage(Message message)
+   static public void unregister(Mailable mailable, String messageId)
+   {
+      if (broadcastMailboxes.containsKey(messageId) == true)
+      {
+         broadcastMailboxes.remove(mailable.getAddress());
+      }
+   }
+   
+   static public void sendMessage(Message message)
    {
       if (message.getDestinationId() != null)
       {
@@ -55,7 +68,7 @@ public class Messenger
       }
    }
    
-   Map<String, Mailable> sendMailboxes = new HashMap<>();
+   static Map<String, Mailable> sendMailboxes = new HashMap<>();
    
-   Map<String, List<Mailable>> broadcastMailboxes = new HashMap<>();
+   static Map<String, List<Mailable>> broadcastMailboxes = new HashMap<>();
 }

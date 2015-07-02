@@ -17,9 +17,11 @@ public void initialize()
 	print("initialize");
 }
 
-public void handleEvent()
+public void handleMessage()
 {
-	print("handleEvent");
+	print("handleMessage: " + message.getMessageId());
+	
+	
 }
 
 public void destroy()

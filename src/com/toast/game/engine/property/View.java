@@ -5,6 +5,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
 
+import com.toast.game.common.XmlUtils;
 import com.toast.game.engine.interfaces.Updatable;
 import com.toast.xml.XmlNode;
 
@@ -122,6 +123,9 @@ public class View extends Property implements Updatable
       isTracking = false;
    }
    */   
+   
+   // **************************************************************************
+   //                           Updatable interface
 
    public void update(
       long elapsedTime)
@@ -132,6 +136,56 @@ public class View extends Property implements Updatable
          trackSprite();
       }
       */
+   }
+   
+   // **************************************************************************
+   //                        xml.Serializable interface
+   
+   /*
+   <view id="">
+      <worldBounds x="" y="" width="" height=""/>
+      <screenBounds x="" y="" width="" height=""/>
+   </view>
+   */
+   
+   @Override
+   public String getNodeName()
+   {
+      return("view");
+   }
+   
+   @Override
+   public XmlNode serialize(XmlNode node)
+   {
+      XmlNode propertyNode = super.serialize(node);
+
+      // worldBounds
+      XmlNode childNode = propertyNode.appendChild("worldBounds");
+      childNode.setAttribute("x",  worldBounds.getX());
+      childNode.setAttribute("y",  worldBounds.getY());
+      childNode.setAttribute("width",  worldBounds.getWidth());
+      childNode.setAttribute("height",  worldBounds.getHeight());
+      
+      // screenBounds
+      childNode = propertyNode.appendChild("screenBounds");
+      childNode.setAttribute("x",  screenBounds.getX());
+      childNode.setAttribute("y",  screenBounds.getY());
+      childNode.setAttribute("width",  screenBounds.getWidth());
+      childNode.setAttribute("height",  screenBounds.getHeight());
+      
+      return (propertyNode);
+   }
+
+   @Override
+   public void deserialize(XmlNode node)
+   {
+      super.deserialize(node);
+      
+      // worldBounds
+      worldBounds = XmlUtils.getRectangle(node.getChild("worldBounds"));
+      
+      // screenBounds
+      screenBounds = XmlUtils.getRectangle(node.getChild("screenBounds"));
    }
    
    // **************************************************************************

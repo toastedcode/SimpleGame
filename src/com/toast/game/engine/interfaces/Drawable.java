@@ -12,4 +12,6 @@ public interface Drawable
    public int getHeight();
    
    public boolean isVisible();
+   
+   public void setVisible(boolean isVisible);
 }

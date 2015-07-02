@@ -8,10 +8,11 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
 import com.toast.game.engine.AnimationMap;
-import com.toast.game.engine.Game;
 import com.toast.game.engine.interfaces.Drawable;
 import com.toast.game.engine.interfaces.Updatable;
 import com.toast.game.engine.message.Message;
+import com.toast.game.engine.message.Messenger;
+import com.toast.xml.XmlNode;
 
 public class Animation extends Property implements Updatable, Drawable
 {
@@ -61,13 +62,23 @@ public class Animation extends Property implements Updatable, Drawable
       this.bufferedImage = bufferedImage;
       ANIMATION_MAP = animationMap;
       ANIMATION_ID = animationId;
-      FRAME_RATE = frameRate;
+      this.frameRate = frameRate;
       elapsedAnimationTime = 0;
       currentFrame = 0;
       animationDirection = AnimationDirection.FORWARD;
       animationType = AnimationType.NONE;
    }
    
+   public Property clone()
+   {
+      Animation clone = new Animation(getId(),
+                                      bufferedImage,
+                                      ANIMATION_MAP,
+                                      ANIMATION_ID,
+                                      frameRate);
+      
+      return (clone);
+   }
    
    public void setCurrentFrame(
       int frame)
@@ -84,7 +95,6 @@ public class Animation extends Property implements Updatable, Drawable
       currentFrame = frame;
    }
    
-   
    public void start(
       AnimationType animationType,
       AnimationDirection animationDirection)
@@ -93,12 +103,10 @@ public class Animation extends Property implements Updatable, Drawable
       this.animationDirection = animationDirection;
    }
    
-   
    public void pause()
    {
       animationType = AnimationType.NONE;
    }
-   
    
    public void stop()
    {
@@ -107,7 +115,7 @@ public class Animation extends Property implements Updatable, Drawable
    }
 
    // **************************************************************************
-   //                               Updatable   
+   //                             Updatable interface   
    
    public void update(
       long elapsedTime)
@@ -126,17 +134,20 @@ public class Animation extends Property implements Updatable, Drawable
       if ((currentFrame != previousFrame) &&
           (isFinished(currentFrame) == true))
       {
-         // Send the "animation finished" message.
-         Message message = new Message("ANIMATION_FINISHED", 
-                                       getParent().getId(), 
-                                       null, 
-                                       new Message.Parameter("animation", this.getId()));
-         Game.getMessenger().sendMessage(message);
+         if (getParent() != null)
+         {
+            // Send the "animation finished" message.
+            Message message = new Message("ANIMATION_FINISHED", 
+                                          getParent().getId(), 
+                                          null, 
+                                          new Message.Parameter("animation", this.getId()));
+            Messenger.sendMessage(message);
+         }
       }
    }
    
    // **************************************************************************
-   //                               Drawable
+   //                           Drawable interface
    
    public int getWidth()
    {
@@ -149,32 +160,105 @@ public class Animation extends Property implements Updatable, Drawable
       return (bufferedImage.getHeight());
    }      
    
-   
    public void draw(Graphics graphics)
    {
-      Point position = new Point(0, 0);
-      double scale = 1.0;
+      if (isVisible() == true)
+      {
+         Point position = new Point(0, 0);
+         double scale = 1.0;
+         
+         // Retrieve the current frame.
+         AnimationMap.Frame frame = ANIMATION_MAP.getFrame(ANIMATION_ID,  currentFrame);
+         
+         Rectangle sourceRectangle = new Rectangle(frame.getPosition(), frame.getDimension());
+         
+         Rectangle destinationRectangle = new Rectangle(position,
+                                                        new Dimension((int)(frame.getDimension().getWidth() * scale), 
+                                                                      (int)(frame.getDimension().getHeight() * scale)));
+         
+         ((Graphics2D)graphics).drawImage(
+            bufferedImage, 
+            destinationRectangle.x, 
+            destinationRectangle.y, 
+            (destinationRectangle.x + destinationRectangle.width), 
+            (destinationRectangle.y + destinationRectangle.height), 
+            sourceRectangle.x, 
+            sourceRectangle.y, 
+            (sourceRectangle.x+ sourceRectangle.width), 
+            (sourceRectangle.y + sourceRectangle.height), 
+            null);
+      }
+   }
+   
+   @Override
+   public boolean isVisible()
+   {
+      return (isVisible);
+   }
+   
+   @Override
+   public void setVisible(boolean isVisible)
+   {
+      this.isVisible = isVisible;
+   } 
+   
+   
+   // **************************************************************************
+   //                        xml.Serializable interface
+   
+   /*
+   <animation id="walk">
+      <image></image>
+      <animationMap></animationMap>
+      <frameRate></frameRate>
+      <isVisible></isVisible>
+   </animation>
+   */
+   
+   @Override
+   public String getNodeName()
+   {
+      return("animation");
+   }
+   
+   @Override
+   public XmlNode serialize(XmlNode node)
+   {
+      XmlNode propertyNode = super.serialize(node);
       
-      // Retrieve the current frame.
-      AnimationMap.Frame frame = ANIMATION_MAP.getFrame(ANIMATION_ID,  currentFrame);
+      // bufferedImage
+      // TODO: Resource id?
+      propertyNode.appendChild("image", "");
       
-      Rectangle sourceRectangle = new Rectangle(frame.getPosition(), frame.getDimension());
+      // animationMap
+      // TODO: Resource id?
+      propertyNode.appendChild("animationMap", "");
       
-      Rectangle destinationRectangle = new Rectangle(position,
-                                                     new Dimension((int)(frame.getDimension().getWidth() * scale), 
-                                                                   (int)(frame.getDimension().getHeight() * scale)));
+      // frameRate
+      propertyNode.appendChild("frameRate", frameRate);
       
-      ((Graphics2D)graphics).drawImage(
-         bufferedImage, 
-         destinationRectangle.x, 
-         destinationRectangle.y, 
-         (destinationRectangle.x + destinationRectangle.width), 
-         (destinationRectangle.y + destinationRectangle.height), 
-         sourceRectangle.x, 
-         sourceRectangle.y, 
-         (sourceRectangle.x+ sourceRectangle.width), 
-         (sourceRectangle.y + sourceRectangle.height), 
-         null);
+      // isVisible
+      propertyNode.appendChild("isVisible", isVisible);
+      
+      return (propertyNode);
+   }
+
+   @Override
+   public void deserialize(XmlNode node)
+   {
+      super.deserialize(node);
+      
+      // bufferedImage
+      // TODO
+      
+      // animationMap
+      // TODO
+
+      // frameRate
+      frameRate = node.getChild("frameRate").getIntValue();
+      
+      // isVisible
+      isVisible = node.getChild("isVisible").getBoolValue();
    }
    
    // **************************************************************************
@@ -198,7 +282,7 @@ public class Animation extends Property implements Updatable, Drawable
    private boolean shouldAdvanceFrame(
       long elapsedTime)
    {
-      return (elapsedTime >= (MILLISECONDS_PER_SECOND / FRAME_RATE));
+      return (elapsedTime >= (MILLISECONDS_PER_SECOND / frameRate));
    }
 
    
@@ -321,7 +405,7 @@ public class Animation extends Property implements Updatable, Drawable
    private final String ANIMATION_ID;
    
    // The speed (frames per second) at which the Animation should be played.
-   private final int FRAME_RATE;
+   private int frameRate;
    
    // A value holding the elapsed time since the last animation frame update.
    private long elapsedAnimationTime;
@@ -333,11 +417,6 @@ public class Animation extends Property implements Updatable, Drawable
    
    // An enumeration determining how the Animation should animate.
    private AnimationType animationType;
-
-   @Override
-   public boolean isVisible()
-   {
-      // TODO Auto-generated method stub
-      return false;
-   }   
+   
+   private boolean isVisible = true;
 }

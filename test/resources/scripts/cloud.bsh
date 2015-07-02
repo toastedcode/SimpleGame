@@ -1,4 +1,5 @@
 import com.toast.game.engine.*;
+import java.awt.geom.Point2D.Double;
 
 // **************************************************************************
 //                                  Constants
@@ -12,37 +13,7 @@ import com.toast.game.engine.*;
 //                            Public Operations
 // **************************************************************************
 
-public void initialize()
+public void initializeClone()
 {
-	print("initialize");
+   clone.setPosition(actor.getPosition());
 }
-
-public void handleMessage()
-{
-	print("handleMessage: " + message.getMessageId());
-	
-	
-}
-
-public void destroy()
-{
-	print("destroy");
-}
-
-public void draw()
-{
-   if (graphics != null)
-   {
-      graphics.setColor(Color.WHITE);
-      graphics.drawOval(0, 0, 50, 50);
-   }
-}
-
-public void update()
-{
-	//print("update");
-}
-
-// **************************************************************************
-//                            Private Operations
-// **************************************************************************

@@ -62,10 +62,10 @@ public class AnimationMap
          <animation id="run" frame="0"/>
          
          <!-- Multi-frame animation ->
-         <animation id="run">
-            <frame index="0">
-            <frame index="5">
-            <frame index="7">
+         <animation id="run"/>
+            <frame index="0"/>
+            <frame index="5"/>
+            <frame index="7"/>
          </animation>
          
          <!-- Sequential-frame animation ->
@@ -129,10 +129,10 @@ public class AnimationMap
          {
             numRows = Integer.valueOf(frameNode.getAttribute("rows"));
          }
-         
-         for (int col = 0; col < numColumns; col++)
+
+         for (int row = 0; row < numRows; row++)
          {
-            for (int row = 0; row < numRows; row++)
+            for (int col = 0; col < numColumns; col++)
             {
                Point position = new Point((int)(startPosition.getX() + (col * dimension.getWidth())),
                                           (int)(startPosition.getY() + (row * dimension.getHeight())));
@@ -182,12 +182,12 @@ public class AnimationMap
             }
          }
          // Multi-frame animation 
-         else if (animationNode.hasChild("frame"))
+         else
          {
             XmlNodeList frameNodes = animationNode.getChildren("frame");
-            for (int j = 0; j < animationNodes.getLength(); j++)
+            for (int j = 0; j < frameNodes.getLength(); j++)
             {
-               XmlNode frameNode = frameNodes.item(i);
+               XmlNode frameNode = frameNodes.item(j);
                
                int frameIndex = Integer.valueOf(frameNode.getAttribute("index"));
                

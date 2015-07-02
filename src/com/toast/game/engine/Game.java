@@ -5,6 +5,9 @@ import java.util.Map;
 
 import javax.swing.JPanel;
 
+import com.toast.game.engine.actor.Actor;
+import com.toast.game.engine.actor.Timer;
+import com.toast.game.engine.message.Message;
 import com.toast.game.engine.message.Messenger;
 import com.toast.xml.XmlNode;
 
@@ -19,7 +22,6 @@ public class Game
       Game.title = title;
       
       createRenderer(width, height, layers);
-      createMessenger();
       createGamePanel();
       createGameLoop();      
    }
@@ -47,9 +49,44 @@ public class Game
       currentScene = scene;
    }
    
-   public static Messenger getMessenger()
+   public static void remove(Scene scene)
    {
-      return (messenger);
+      if (currentScene == scene)
+      {
+         currentScene = null;
+      }
+      
+      scenes.remove(scene.getId());
+   }
+   
+   public static void add(Actor actor)
+   {
+      if (currentScene != null)
+      {
+         Messenger.register(actor);
+         currentScene.add(actor);
+      }
+   }
+   
+   public static Actor getActor(String id)
+   {
+      Actor actor = null;
+      
+      if (currentScene != null)
+      {
+         actor = currentScene.getActor(id);
+      }
+      
+      return (actor);
+   }
+   
+   public static void remove(Actor actor)
+   {
+      if (currentScene != null)
+      {
+         Messenger.unregister(actor);
+         currentScene.remove(actor);
+      }
    }
    
    public static JPanel getGamePanel()
@@ -73,6 +110,25 @@ public class Game
       return (isPaused);
    }
    
+   public static Timer startTimer(
+      String id,
+      double duration,
+      boolean isPeriodic,
+      Message message)
+   {
+      Timer timer = new Timer(id, duration, isPeriodic, message);
+      
+      Game.getCurrentScene().add(timer);
+      timer.start();
+      
+      return (timer);
+   }
+   
+   public static void cancelTimer(String id)
+   {
+      Game.remove(Game.getActor(id));
+   }
+   
    // **************************************************************************
    //                             Private operations
    // **************************************************************************
@@ -80,11 +136,6 @@ public class Game
    private static void createRenderer(int width, int height, int layers)
    {
       renderer = new Renderer(width, height, layers);
-   }
-   
-   private static void createMessenger()
-   {
-      messenger = new Messenger();
    }
    
    @SuppressWarnings("serial")
@@ -100,7 +151,9 @@ public class Game
                renderer.paint(graphics,  this);
             }
          }
-      };      
+      };
+      
+      Input.observe(gamePanel);
    }
    
    private static void createGameLoop()
@@ -178,8 +231,6 @@ public class Game
    private static JPanel gamePanel;
    
    private static Renderer renderer;
-   
-   private static Messenger messenger;
    
    private static Map<String, Scene> scenes;
    

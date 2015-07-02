@@ -14,33 +14,49 @@ import com.toast.game.engine.*;
 
 public void initialize()
 {
-	print("initialize");
 }
 
 public void handleMessage()
 {
-	print("handleMessage: " + message.getMessageId());
-	
-	
+   switch (message.getMessageId())
+   {
+      case "msgUP":
+      {
+         boolean isPressed = Boolean.valueOf(message.getPayload("isPressed"));
+         up(isPressed);
+         break;
+      }
+      
+      case "msgDOWN":
+      {
+         boolean isPressed = Boolean.valueOf(message.getPayload("isPressed"));
+         up(isPressed);
+         break;
+      }
+      
+      case "msgLEFT":
+      {
+         boolean isPressed = Boolean.valueOf(message.getPayload("isPressed"));
+         up(isPressed);
+         break;
+      }
+      
+      case "msgRIGHT":
+      {
+         boolean isPressed = Boolean.valueOf(message.getPayload("isPressed"));
+         up(isPressed);
+         break;
+      }
+      
+      default:
+      {
+         break;
+      }
+   }
 }
 
 public void destroy()
 {
-	print("destroy");
-}
-
-public void draw()
-{
-   if (graphics != null)
-   {
-      graphics.setColor(Color.WHITE);
-      graphics.drawOval(0, 0, 50, 50);
-   }
-}
-
-public void update()
-{
-	//print("update");
 }
 
 // **************************************************************************
