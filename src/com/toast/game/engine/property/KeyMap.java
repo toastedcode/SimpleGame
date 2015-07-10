@@ -10,6 +10,7 @@ import com.toast.game.engine.message.MessageHandler;
 import com.toast.game.engine.message.Messenger;
 import com.toast.xml.XmlNode;
 import com.toast.xml.XmlNodeList;
+import com.toast.xml.exception.XmlFormatException;
 
 public class KeyMap extends Property implements MessageHandler
 {
@@ -22,7 +23,7 @@ public class KeyMap extends Property implements MessageHandler
       super(id);
    }
    
-   public KeyMap(XmlNode node)
+   public KeyMap(XmlNode node) throws XmlFormatException
    {
       super(node);
    }
@@ -109,7 +110,7 @@ public class KeyMap extends Property implements MessageHandler
    }
 
    @Override
-   public void deserialize(XmlNode node)
+   public void deserialize(XmlNode node) throws XmlFormatException
    {
       super.deserialize(node);
       
@@ -119,11 +120,9 @@ public class KeyMap extends Property implements MessageHandler
       
       XmlNodeList keyNodes = node.getChildren("key");
       
-      for (int i = 0; i < keyNodes.getLength(); i++)
+      for (XmlNode keyNode : keyNodes)
       {
-         XmlNode keyNode = keyNodes.item(i);
-         
-         mapKey(Integer.valueOf(keyNode.getAttribute("keyId")), keyNode.getValue());
+         mapKey(keyNode.getAttribute("keyId").getIntValue(), keyNode.getValue());
       }
    }
    

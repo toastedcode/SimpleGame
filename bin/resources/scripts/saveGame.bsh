@@ -1,0 +1,21 @@
+import java.awt.event.KeyEvent;
+import com.toast.game.engine.*;
+
+// **************************************************************************
+//                            Public Operations
+// **************************************************************************
+
+public void handleMessage()
+{
+   if (message.getMessageId().equals("msgKEY_PRESSED"))
+   {
+      KeyEvent event = (KeyEvent)message.getPayload("keyEvent");
+      char keyChar = event.getKeyChar();
+      
+      if (keyChar == 's')
+      {
+         print("Saving ...\n");
+         Game.getCurrentScene().save("/resources/scenes/saved.xml");
+      }
+   }
+}

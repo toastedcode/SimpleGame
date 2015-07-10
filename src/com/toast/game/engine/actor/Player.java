@@ -9,6 +9,7 @@ import com.toast.game.engine.message.MessageHandler;
 import com.toast.game.engine.property.Property;
 import com.toast.game.engine.property.Animation;
 import com.toast.xml.XmlNode;
+import com.toast.xml.exception.XmlFormatException;
 
 public class Player extends Actor
 {
@@ -103,7 +104,7 @@ public class Player extends Actor
    }
 
    @Override
-   public void deserialize(XmlNode node)
+   public void deserialize(XmlNode node) throws XmlFormatException
    {
       super.deserialize(node);
    }

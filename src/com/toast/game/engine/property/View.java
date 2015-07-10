@@ -8,6 +8,7 @@ import java.awt.Shape;
 import com.toast.game.common.XmlUtils;
 import com.toast.game.engine.interfaces.Updatable;
 import com.toast.xml.XmlNode;
+import com.toast.xml.exception.XmlFormatException;
 
 public class View extends Property implements Updatable
 {
@@ -22,8 +23,7 @@ public class View extends Property implements Updatable
       this.screenBounds = screenBounds;
    }
    
-   public View(
-      XmlNode node)
+   public View(XmlNode node) throws XmlFormatException
    {
       super(node);
    }
@@ -177,7 +177,7 @@ public class View extends Property implements Updatable
    }
 
    @Override
-   public void deserialize(XmlNode node)
+   public void deserialize(XmlNode node) throws XmlFormatException
    {
       super.deserialize(node);
       

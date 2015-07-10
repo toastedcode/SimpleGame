@@ -3,6 +3,7 @@ package com.toast.game.common;
 import java.awt.Rectangle;
 
 import com.toast.xml.XmlNode;
+import com.toast.xml.exception.XmlFormatException;
 
 public class XmlUtils
 {
@@ -14,14 +15,14 @@ public class XmlUtils
    }
    */
    
-   public static Vector2D getVector(XmlNode node)
+   public static Vector2D getVector(XmlNode node) throws XmlFormatException
    {
       Vector2D vector = new Vector2D(node.getChild("x").getDoubleValue(), node.getChild("y").getDoubleValue());
       
       return (vector);
    }
    
-   public static Rectangle getRectangle(XmlNode node)
+   public static Rectangle getRectangle(XmlNode node) throws XmlFormatException
    {
       Rectangle rectangle = new Rectangle(node.getChild("x").getIntValue(), 
                                           node.getChild("y").getIntValue(),

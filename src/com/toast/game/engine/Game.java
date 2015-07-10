@@ -9,7 +9,6 @@ import com.toast.game.engine.actor.Actor;
 import com.toast.game.engine.actor.Timer;
 import com.toast.game.engine.message.Message;
 import com.toast.game.engine.message.Messenger;
-import com.toast.xml.XmlNode;
 
 public class Game
 {
@@ -22,14 +21,6 @@ public class Game
       Game.title = title;
       
       createRenderer(width, height, layers);
-      createGamePanel();
-      createGameLoop();      
-   }
-   
-   public static void load(XmlNode node)
-   {
-      title = "Simple Game";
-      createRenderer(800, 600, 3);
       createGamePanel();
       createGameLoop();      
    }

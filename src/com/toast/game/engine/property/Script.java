@@ -16,6 +16,9 @@ import com.toast.game.engine.interfaces.Drawable;
 import com.toast.game.engine.interfaces.Updatable;
 import com.toast.game.engine.message.Message;
 import com.toast.game.engine.message.MessageHandler;
+import com.toast.game.engine.resource.ScriptResource;
+import com.toast.xml.XmlNode;
+import com.toast.xml.exception.XmlFormatException;
 
 public class Script extends Property implements Drawable, Updatable, MessageHandler
 {
@@ -80,8 +83,6 @@ public class Script extends Property implements Drawable, Updatable, MessageHand
    {
       super(id);
       
-      this.file = file;
-      
       try
       {
          interpreter.source(file.getAbsolutePath());
@@ -107,9 +108,51 @@ public class Script extends Property implements Drawable, Updatable, MessageHand
       }
    }
    
+   public Script(
+      String id,
+      ScriptResource resource)
+   {
+      super(id);
+      
+      this.resource = resource;
+      
+      try
+      {
+         interpreter.source(resource.getFile().getAbsolutePath());
+         
+         scanFunctions();
+         
+         isValid = true;
+      } 
+      catch (FileNotFoundException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+      catch (IOException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+      catch (EvalError e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+   }
+   
+   public Script(XmlNode node) throws XmlFormatException
+   {
+      super(node);
+      
+      deserializeThis(node);
+   }
+   
    public Property clone()
    {
-      Script clone = new Script(getId(), file);
+      Script clone = null;
+      
+      // TODO
       
       return (clone);
    }
@@ -202,9 +245,12 @@ public class Script extends Property implements Drawable, Updatable, MessageHand
    @Override
    public void update(long elapsedTime)
    {
-      evaluate(Script.Function.UPDATE, 
-               new Script.Variable("actor", getParent()), 
-               new Script.Variable("elapsedTime", elapsedTime));
+      if (supports(Script.Function.UPDATE.getCallString()))
+      {
+         evaluate(Script.Function.UPDATE, 
+                  new Script.Variable("actor", getParent()), 
+                  new Script.Variable("elapsedTime", elapsedTime));
+      }
    }
    
    // **************************************************************************
@@ -213,9 +259,47 @@ public class Script extends Property implements Drawable, Updatable, MessageHand
    @Override
    public void handleMessage(Message message)
    {
-      evaluate(Script.Function.HANDLE_MESSAGE, 
-            new Script.Variable("actor", getParent()), 
-            new Script.Variable("message", message));
+      if (supports(Script.Function.HANDLE_MESSAGE.getCallString()))
+      {
+         evaluate(Script.Function.HANDLE_MESSAGE, 
+               new Script.Variable("actor", getParent()), 
+               new Script.Variable("message", message));
+      }
+   }
+   
+   // **************************************************************************
+   //                        xml.Serializable interface
+   
+   /*
+      <script resource=""/>
+   */
+   
+   @Override
+   public String getNodeName()
+   {
+      return("script");
+   }
+   
+   @Override
+   public XmlNode serialize(XmlNode node)
+   {
+      XmlNode propertyNode = super.serialize(node);
+      
+      // resource
+      if (resource != null)
+      {
+         propertyNode.setAttribute("resource",  resource.getId());
+      }
+      
+      return (propertyNode);
+   }
+
+   @Override
+   public void deserialize(XmlNode node) throws XmlFormatException
+   {
+      super.deserialize(node);
+      
+      deserializeThis(node);
    }
    
    // **************************************************************************
@@ -229,7 +313,7 @@ public class Script extends Property implements Drawable, Updatable, MessageHand
       BufferedReader br = null;
       String line = null;
       
-      br = new BufferedReader(new FileReader(file));
+      br = new BufferedReader(new FileReader(resource.getFile()));
       
       while ((line = br.readLine()) != null)
       {
@@ -248,6 +332,8 @@ public class Script extends Property implements Drawable, Updatable, MessageHand
                startPos--;
             }
             
+            startPos++;
+            
             String functionName = line.substring(startPos, endPos);
             functions.add(functionName);
          }
@@ -256,7 +342,46 @@ public class Script extends Property implements Drawable, Updatable, MessageHand
       br.close();
    }
    
-   private File file;
+   private void deserializeThis(XmlNode node) throws XmlFormatException
+   {
+      // resource
+      if (node.hasAttribute("resource"))
+      {
+         String resourceId = node.getAttribute("resource").getValue();
+         
+         resource = ScriptResource.getResource(resourceId);
+         
+         if ((resource != null) &&
+             (resource.isLoaded()))
+         {
+            try
+            {
+               interpreter.source(resource.getFile().getAbsolutePath());
+               
+               scanFunctions();
+               
+               isValid = true;
+            } 
+            catch (FileNotFoundException e)
+            {
+               // TODO Auto-generated catch block
+               e.printStackTrace();
+            }
+            catch (IOException e)
+            {
+               // TODO Auto-generated catch block
+               e.printStackTrace();
+            }
+            catch (EvalError e)
+            {
+               // TODO Auto-generated catch block
+               e.printStackTrace();
+            }
+         }
+      }
+   }
+   
+   private ScriptResource resource;
 
    private Interpreter interpreter = new Interpreter();
    

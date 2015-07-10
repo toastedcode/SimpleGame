@@ -9,6 +9,7 @@ import com.toast.game.engine.message.Message;
 import com.toast.game.engine.message.MessageHandler;
 import com.toast.xml.XmlNode;
 import com.toast.xml.XmlNodeList;
+import com.toast.xml.exception.XmlFormatException;
 
 public class Motor extends Property implements MessageHandler
 {
@@ -30,9 +31,11 @@ public class Motor extends Property implements MessageHandler
       super(id);
    }
    
-   public Motor(XmlNode node)
+   public Motor(XmlNode node) throws XmlFormatException
    {
       super(node);
+      
+      deserializeThis(node);
    }
    
    public void mapKey(int keyId, Direction direction)
@@ -143,23 +146,11 @@ public class Motor extends Property implements MessageHandler
    }
 
    @Override
-   public void deserialize(XmlNode node)
+   public void deserialize(XmlNode node) throws XmlFormatException
    {
       super.deserialize(node);
       
-      //
-      // keyMap
-      //
-      
-      XmlNodeList keyNodes = node.getChild("keyMap").getChildren("key");
-      
-      for (int i = 0; i < keyNodes.getLength(); i++)
-      {
-         XmlNode keyNode = keyNodes.item(i);
-         
-         keyMap.put(Integer.valueOf(keyNode.getAttribute("keyId")), Motor.Direction.valueOf(keyNode.getValue()));
-      }
-      
+      deserializeThis(node);
    }
    
    // **************************************************************************
@@ -186,5 +177,28 @@ public class Motor extends Property implements MessageHandler
       getParent().moveBy(10, 0);
    }
    
-   Map<Integer, Direction> keyMap = new HashMap<>();
+   // **************************************************************************
+   //                                 Protected
+   // **************************************************************************
+   
+   // **************************************************************************
+   //                                  Private
+   // **************************************************************************
+   
+   private void deserializeThis(XmlNode node) throws XmlFormatException
+   {
+      //
+      // keyMap
+      //
+      
+      XmlNodeList keyNodes = node.getChild("keyMap").getChildren("key");
+      
+      for (XmlNode keyNode : keyNodes)
+      {
+         keyMap.put(keyNode.getAttribute("keyId").getIntValue(), Motor.Direction.valueOf(keyNode.getValue()));
+      }
+      
+   }
+   
+   private Map<Integer, Direction> keyMap = new HashMap<>();
 }

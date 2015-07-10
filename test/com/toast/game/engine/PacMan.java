@@ -25,7 +25,11 @@ import com.toast.game.engine.property.Image;
 import com.toast.game.engine.property.Motor;
 import com.toast.game.engine.property.Physics;
 import com.toast.game.engine.property.Script;
-import com.toast.swing.Resource;
+import com.toast.game.engine.resource.ImageResource;
+import com.toast.game.engine.resource.Resource;
+import com.toast.game.engine.resource.ResourceCreationException;
+import com.toast.game.engine.resource.ScriptResource;
+import com.toast.game.engine.resource.XmlResource;
 import com.toast.xml.XmlDocument;
 import com.toast.xml.XmlNode;
 
@@ -39,6 +43,24 @@ public class PacMan
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       frame.setSize((int)SCREEN_DIMENSION.getWidth(), (int)SCREEN_DIMENSION.getHeight());
       
+      // Resources
+      try
+      {
+         Resource.loadResource("/resources/images/jason.png");
+         Resource.loadResource("/resources/images/boxy.png");
+         Resource.loadResource("/resources/images/rain.png");
+         Resource.loadResource("/resources/images/cloud.png");
+         Resource.loadResource("/resources/images/pacMan.png");
+         Resource.loadResource("/resources/scripts/test.bsh");
+         Resource.loadResource("/resources/scripts/cloud.bsh");
+         Resource.loadResource("/resources/animations/boxy.anim");
+         Resource.loadResource("/resources/animations/pacMan.anim");
+      }
+      catch (ResourceCreationException e)
+      {
+         throw (new RuntimeException(e));
+      }
+      
       Game.create("Pac Man", (int)SCREEN_DIMENSION.getWidth(), (int)SCREEN_DIMENSION.getHeight(), 1);
       
       Scene levelOne = new Scene("level 1");
@@ -47,14 +69,14 @@ public class PacMan
       // Jason
       
       Actor jason = new Actor("jason");
-      jason.add(new Image("jasonHead", Resource.getImage("/resources/images/jason.png")));
+      jason.add(new Image("jasonHead", ImageResource.getResource("jason.png")));
       jason.setZOrder(0);
       
       Physics physics = new Physics("physics");
       physics.setVelocity(new Vector2D(150, 0));
       jason.add(physics);
       
-      Script script = new Script("script", Resource.getFile("/resources/scripts/test.bsh"));
+      Script script = new Script("script", ScriptResource.getResource("test.bsh"));
       jason.add(script);
       
       jason.setState("highScore",  100);
@@ -79,11 +101,11 @@ public class PacMan
       boxy.setZOrder(1);
       
       Animation idleAnim = new Animation("walk", 
-                                         Resource.getImage("/resources/images/boxy.png"),
-                                         new AnimationMap(Resource.getXmlDocument("/resources/animations/boxy.anim")),
+                                         ImageResource.getResource("boxy.png"),
+                                         XmlResource.getResource("boxy.anim"),
                                          "walk",
                                           3);
-      idleAnim.start(AnimationType.NORMAL, AnimationDirection.FORWARD);
+      idleAnim.start(AnimationType.LOOP, AnimationDirection.FORWARD);
       boxy.add(idleAnim);
       
       Follower follower = new Follower("follower");
@@ -95,7 +117,7 @@ public class PacMan
       // Rain drop
       
       Actor drop = new Actor("drop");
-      drop.add(new Image("rainDrop", Resource.getImage("/resources/images/rain.png")));
+      drop.add(new Image("rainDrop", ImageResource.getResource("rain.png")));
       
       physics = new Physics("physics");
       physics.setGravity(new Vector2D(0, 100));
@@ -107,9 +129,9 @@ public class PacMan
       cloud.setFrequency(500);
       cloud.setActor(drop);
       cloud.moveTo(300, 300);
-      cloud.add(new Image("rainCloud", Resource.getImage("/resources/images/cloud.png")));
+      cloud.add(new Image("rainCloud", ImageResource.getResource("cloud.png")));
       
-      script = new Script("rainScript", Resource.getFile("/resources/scripts/cloud.bsh"));
+      script = new Script("rainScript", ScriptResource.getResource("cloud.bsh"));
       cloud.add(script);
       
       levelOne.add(cloud);
@@ -119,8 +141,8 @@ public class PacMan
       Actor pacMan = new Actor("pacMan");
       pacMan.moveTo(0, 300);
       
-      BufferedImage spriteMap = Resource.getImage("/resources/images/pacMan.png");
-      AnimationMap animMap = new AnimationMap(Resource.getXmlDocument("/resources/animations/pacMan.anim"));
+      ImageResource spriteMap = ImageResource.getResource("pacMan.png");
+      XmlResource animMap = XmlResource.getResource("pacMan.anim");
       Animation right = new Animation("right", 
                                       spriteMap,
                                       animMap,

@@ -1,6 +1,7 @@
 package com.toast.game.engine.property;
 
 import com.toast.xml.XmlNode;
+import com.toast.xml.exception.XmlFormatException;
 
 public class State extends Property
 {
@@ -62,13 +63,13 @@ public class State extends Property
    }
 
    @Override
-   public void deserialize(XmlNode node)
+   public void deserialize(XmlNode node) throws XmlFormatException
    {
       super.deserialize(node);
       
       try
       {
-         Class<?> propertyClass = Class.forName(node.getAttribute("class"));
+         Class<?> propertyClass = Class.forName(node.getAttribute("class").getValue());
          
          value = (Object)propertyClass.newInstance();
          

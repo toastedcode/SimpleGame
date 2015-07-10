@@ -45,7 +45,7 @@ public class AnimationGroup extends Property implements Updatable, Drawable
       else if (animations.containsKey(animationId) == true)
       {
          currentAnimation = animations.get(animationId);
-         currentAnimation.start(AnimationType.NORMAL, AnimationDirection.FORWARD);
+         currentAnimation.start(animationType, animationDirection);
       }
       else
       {

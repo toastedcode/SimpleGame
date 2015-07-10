@@ -57,13 +57,4 @@ public class DrawList extends ArrayList<Actor>
                  (actor1.getZOrder() == actor2.getZOrder()) ? 0 : 1));
       }
    };
-   
-   private static final Comparator<Actor> Z_ORDER_ASCENDING_COMPARATOR = new Comparator<Actor>()
-   {
-      public int compare(Actor actor1, Actor actor2)
-      {
-         return(((actor1.getZOrder() < actor2.getZOrder()) ? -1 :
-                 (actor1.getZOrder() == actor2.getZOrder()) ? 0 : 1));
-      }
-   };        
 }

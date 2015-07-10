@@ -8,7 +8,9 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
 import com.toast.game.engine.interfaces.Drawable;
+import com.toast.game.engine.resource.ImageResource;
 import com.toast.xml.XmlNode;
+import com.toast.xml.exception.XmlFormatException;
 
 public class Image extends Property implements Drawable
 {
@@ -18,6 +20,22 @@ public class Image extends Property implements Drawable
    {
       super(id);
       this.bufferedImage = bufferedImage;
+   }
+   
+   public Image(
+      String id,
+      ImageResource resource)
+   {
+      super(id);
+      this.resource = resource;
+      this.bufferedImage = resource.getImage();
+   }
+   
+   public Image(XmlNode node) throws XmlFormatException
+   {
+      super(node);
+      
+      deserializeThis(node);
    }
    
    public Property clone()
@@ -104,9 +122,11 @@ public class Image extends Property implements Drawable
    {
       XmlNode propertyNode = super.serialize(node);
       
-      // bufferedImage
-      // TODO: Resource id?
-      propertyNode.appendChild("image", "");
+      // resource
+      if (resource != null)
+      {
+         propertyNode.setAttribute("src",  resource.getId());
+      }
 
       // isVisible
       propertyNode.appendChild("isVisible", isVisible);
@@ -115,18 +135,38 @@ public class Image extends Property implements Drawable
    }
 
    @Override
-   public void deserialize(XmlNode node)
+   public void deserialize(XmlNode node) throws XmlFormatException
    {
       super.deserialize(node);
       
-      // bufferedImage
-      // TODO
-      
-      // isVisible
-      isVisible = node.getChild("isVisible").getBoolValue();
+      deserializeThis(node);
    }
    
-   private final BufferedImage bufferedImage;
+   private void deserializeThis(XmlNode node) throws XmlFormatException
+   {
+      // resource
+      if (node.hasAttribute("resource"))
+      {
+         String resourceId = node.getAttribute("resource").getValue();
+         
+         resource = ImageResource.getResource(resourceId);
+         
+         if (resource != null)
+         {
+            bufferedImage = resource.getImage();
+         }
+      }
+      
+      // isVisible
+      if (node.hasChild("isVisible"))
+      {
+         isVisible = node.getChild("isVisible").getBoolValue();
+      }      
+   }
+   
+   private ImageResource resource;
+      
+   private BufferedImage bufferedImage;
    
    private boolean isVisible = true;
 }

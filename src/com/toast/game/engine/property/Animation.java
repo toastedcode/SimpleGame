@@ -12,7 +12,10 @@ import com.toast.game.engine.interfaces.Drawable;
 import com.toast.game.engine.interfaces.Updatable;
 import com.toast.game.engine.message.Message;
 import com.toast.game.engine.message.Messenger;
+import com.toast.game.engine.resource.ImageResource;
+import com.toast.game.engine.resource.XmlResource;
 import com.toast.xml.XmlNode;
+import com.toast.xml.exception.XmlFormatException;
 
 public class Animation extends Property implements Updatable, Drawable
 {
@@ -60,7 +63,28 @@ public class Animation extends Property implements Updatable, Drawable
       super(id);
       
       this.bufferedImage = bufferedImage;
-      ANIMATION_MAP = animationMap;
+      this.animationMap = animationMap;
+      ANIMATION_ID = animationId;
+      this.frameRate = frameRate;
+      elapsedAnimationTime = 0;
+      currentFrame = 0;
+      animationDirection = AnimationDirection.FORWARD;
+      animationType = AnimationType.NONE;
+   }
+   
+   public Animation(
+      String id,
+      ImageResource imageResource,
+      XmlResource xmlResource,
+      String animationId,
+      int frameRate)
+   {
+      super(id);
+      
+      this.imageResource = imageResource;
+      this.xmlResource = xmlResource;
+      this.bufferedImage = imageResource.getImage();
+      animationMap = new AnimationMap(xmlResource);
       ANIMATION_ID = animationId;
       this.frameRate = frameRate;
       elapsedAnimationTime = 0;
@@ -73,7 +97,7 @@ public class Animation extends Property implements Updatable, Drawable
    {
       Animation clone = new Animation(getId(),
                                       bufferedImage,
-                                      ANIMATION_MAP,
+                                      animationMap,
                                       ANIMATION_ID,
                                       frameRate);
       
@@ -168,7 +192,7 @@ public class Animation extends Property implements Updatable, Drawable
          double scale = 1.0;
          
          // Retrieve the current frame.
-         AnimationMap.Frame frame = ANIMATION_MAP.getFrame(ANIMATION_ID,  currentFrame);
+         AnimationMap.Frame frame = animationMap.getFrame(ANIMATION_ID,  currentFrame);
          
          Rectangle sourceRectangle = new Rectangle(frame.getPosition(), frame.getDimension());
          
@@ -227,12 +251,15 @@ public class Animation extends Property implements Updatable, Drawable
       XmlNode propertyNode = super.serialize(node);
       
       // bufferedImage
-      // TODO: Resource id?
-      propertyNode.appendChild("image", "");
+      if (imageResource != null)
+      {
+         propertyNode.appendChild("image", imageResource.getId());
+      }
       
-      // animationMap
-      // TODO: Resource id?
-      propertyNode.appendChild("animationMap", "");
+      if (xmlResource != null)
+      {
+         propertyNode.appendChild("animationMap", xmlResource.getId());
+      }
       
       // frameRate
       propertyNode.appendChild("frameRate", frameRate);
@@ -244,15 +271,33 @@ public class Animation extends Property implements Updatable, Drawable
    }
 
    @Override
-   public void deserialize(XmlNode node)
+   public void deserialize(XmlNode node) throws XmlFormatException
    {
       super.deserialize(node);
       
       // bufferedImage
-      // TODO
+      if (node.hasChild("image"))
+      {
+         String resourceId = node.getChild("image").getValue();
+         imageResource = ImageResource.getResource(resourceId);
+         
+         if (imageResource != null)
+         {
+            bufferedImage = imageResource.getImage();
+         }
+      }
       
       // animationMap
-      // TODO
+      if (node.hasChild("animationMap"))
+      {
+         String resourceId = node.getChild("animationMap").getValue();
+         xmlResource = XmlResource.getResource(resourceId);
+         
+         if (xmlResource != null)
+         {
+            animationMap = new AnimationMap(xmlResource);
+         }
+      }
 
       // frameRate
       frameRate = node.getChild("frameRate").getIntValue();
@@ -273,7 +318,7 @@ public class Animation extends Property implements Updatable, Drawable
    
    private int getEndFrame()
    {
-      return (ANIMATION_MAP.getNumberOfFrames(ANIMATION_ID) - 1);
+      return (animationMap.getNumberOfFrames(ANIMATION_ID) - 1);
    }
    
    
@@ -396,11 +441,15 @@ public class Animation extends Property implements Updatable, Drawable
    // **************************************************************************
    
    // A constant specifying the number of milliseconds in a second.
-   private static final int MILLISECONDS_PER_SECOND = 1000;  
+   private static final int MILLISECONDS_PER_SECOND = 1000;
    
-   private final BufferedImage bufferedImage;
+   private ImageResource imageResource = null;
+   
+   private XmlResource xmlResource = null;
+   
+   private BufferedImage bufferedImage;
 
-   private final AnimationMap ANIMATION_MAP;
+   private AnimationMap animationMap;
    
    private final String ANIMATION_ID;
    

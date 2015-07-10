@@ -7,7 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.toast.game.engine.resource.XmlResource;
 import com.toast.xml.*;
+import com.toast.xml.exception.XPathExpressionException;
+import com.toast.xml.exception.XmlFormatException;
 
 public class AnimationMap
 {
@@ -76,6 +79,16 @@ public class AnimationMap
       loadAnimations(document);
    }
    
+   public AnimationMap(XmlResource resource)
+   {
+      this.resource = resource;
+      
+      XmlDocument document = resource.getDocument();
+      
+      loadFrames(document);
+      loadAnimations(document);
+   }
+   
    public Frame getFrame(
       String animationId, 
       int frameIndex)
@@ -107,98 +120,116 @@ public class AnimationMap
    private void loadFrames(
       XmlDocument document)
    {
-      XmlNodeList frameNodes = document.getRootNode().getNodes("frame");
-      for (int i = 0; i < frameNodes.getLength(); i++)
+      try
       {
-         XmlNode frameNode = frameNodes.item(i);
-         
-         Point startPosition = new Point(Integer.valueOf(frameNode.getAttribute("x")),
-                                         Integer.valueOf(frameNode.getAttribute("y")));
-         
-         Dimension dimension = new Dimension(Integer.valueOf(frameNode.getAttribute("width")),
-                                             Integer.valueOf(frameNode.getAttribute("height")));
-         
-         int numColumns = 1;
-         if (frameNode.hasAttribute("columns") == true)
+         XmlNodeList frameNodes = document.getRootNode().getNodes("frame");
+         for (XmlNode frameNode : frameNodes)
          {
-            numColumns = Integer.valueOf(frameNode.getAttribute("columns"));
-         }
-         
-         int numRows = 1;
-         if (frameNode.hasAttribute("rows") == true)
-         {
-            numRows = Integer.valueOf(frameNode.getAttribute("rows"));
-         }
-
-         for (int row = 0; row < numRows; row++)
-         {
-            for (int col = 0; col < numColumns; col++)
+            Point startPosition = new Point(frameNode.getAttribute("x").getIntValue(),
+                                            frameNode.getAttribute("y").getIntValue());
+            
+            Dimension dimension = new Dimension(frameNode.getAttribute("width").getIntValue(),
+                                                frameNode.getAttribute("height").getIntValue());
+            
+            int numColumns = 1;
+            if (frameNode.hasAttribute("columns") == true)
             {
-               Point position = new Point((int)(startPosition.getX() + (col * dimension.getWidth())),
-                                          (int)(startPosition.getY() + (row * dimension.getHeight())));
-               
-               frames.add(new Frame(position, dimension));
+               numColumns = frameNode.getAttribute("columns").getIntValue();
+            }
+            
+            int numRows = 1;
+            if (frameNode.hasAttribute("rows") == true)
+            {
+               numRows = frameNode.getAttribute("rows").getIntValue();
+            }
+   
+            for (int row = 0; row < numRows; row++)
+            {
+               for (int col = 0; col < numColumns; col++)
+               {
+                  Point position = new Point((int)(startPosition.getX() + (col * dimension.getWidth())),
+                                             (int)(startPosition.getY() + (row * dimension.getHeight())));
+                  
+                  frames.add(new Frame(position, dimension));
+               }
             }
          }
-      }      
+      }
+      catch (XPathExpressionException e)
+      {
+         throw (new RuntimeException("Programmer error! Bad XPath expression."));
+      }
+      catch (XmlFormatException e)
+      {
+         // TODO
+         System.out.println(e);
+      }
    }
    
    private void loadAnimations(
       XmlDocument document)
    {
-      XmlNodeList animationNodes = document.getRootNode().getNodes("animation");
-      for (int i = 0; i < animationNodes.getLength(); i++)
+      try
       {
-         XmlNode animationNode = animationNodes.item(i);
-         
-         FrameList frameSet = new FrameList();
-         
-         String id = animationNode.getAttribute("id");
-         
-         // Single frame animation
-         if (animationNode.hasAttribute("frame") == true)
+         XmlNodeList animationNodes = document.getRootNode().getNodes("animation");
+         for (XmlNode animationNode : animationNodes)
          {
-            int frameIndex = Integer.valueOf(animationNode.getAttribute("frame"));
+            FrameList frameSet = new FrameList();
             
-            if (validateFrameIndex(frameIndex) == true)
-            {
-               frameSet.add(frames.get(frameIndex));
-            }
-         }
-         // Sequential frame animation
-         else if ((animationNode.hasAttribute("startFrame") == true) &&
-                  (animationNode.hasAttribute("endFrame") == true))
-         {
-            int startFrame = Integer.valueOf(animationNode.getAttribute("startFrame"));
-            int endFrame = Integer.valueOf(animationNode.getAttribute("endFrame"));
+            String id = animationNode.getAttribute("id").getValue();
             
-            if ((validateFrameIndex(startFrame) == true) &&
-                (validateFrameIndex(startFrame) == true))
+            // Single frame animation
+            if (animationNode.hasAttribute("frame") == true)
             {
-               for (int frameIndex = startFrame; frameIndex <= endFrame; frameIndex++)
+               int frameIndex = animationNode.getAttribute("frame").getIntValue();
+               
+               if (validateFrameIndex(frameIndex) == true)
                {
                   frameSet.add(frames.get(frameIndex));
                }
             }
-         }
-         // Multi-frame animation 
-         else
-         {
-            XmlNodeList frameNodes = animationNode.getChildren("frame");
-            for (int j = 0; j < frameNodes.getLength(); j++)
+            // Sequential frame animation
+            else if ((animationNode.hasAttribute("startFrame") == true) &&
+                     (animationNode.hasAttribute("endFrame") == true))
             {
-               XmlNode frameNode = frameNodes.item(j);
+               int startFrame = animationNode.getAttribute("startFrame").getIntValue();
+               int endFrame = animationNode.getAttribute("endFrame").getIntValue();
                
-               int frameIndex = Integer.valueOf(frameNode.getAttribute("index"));
-               
-               if (validateFrameIndex(frameIndex) == true)
+               if ((validateFrameIndex(startFrame) == true) &&
+                   (validateFrameIndex(startFrame) == true))
                {
-                  frameSet.add(frames.get(frameIndex));                  
+                  for (int frameIndex = startFrame; frameIndex <= endFrame; frameIndex++)
+                  {
+                     frameSet.add(frames.get(frameIndex));
+                  }
                }
             }
+            // Multi-frame animation 
+            else
+            {
+               XmlNodeList frameNodes = animationNode.getChildren("frame");
+               for (XmlNode frameNode : frameNodes)
+               {
+                  int frameIndex = frameNode.getAttribute("index").getIntValue();
+                  
+                  if (validateFrameIndex(frameIndex) == true)
+                  {
+                     frameSet.add(frames.get(frameIndex));                  
+                  }
+               }
+            }
+            
+            animations.put(id, frameSet);
          }
-         
-         animations.put(id, frameSet);
+      }
+      catch (XPathExpressionException e)
+      {
+         throw (new RuntimeException("Programmer error! Bad XPath expression."));
+      }      
+      catch (XmlFormatException e)
+      {
+         // TODO
+         System.out.println(e);
       }
    }
    
@@ -208,6 +239,8 @@ public class AnimationMap
               (frameIndex >= 0) &&
               (frameIndex < frames.size()));
    }
+   
+   private XmlResource resource;
    
    private List<Frame> frames = new ArrayList<>();
    

@@ -8,6 +8,7 @@ import com.toast.game.engine.actor.Actor;
 import com.toast.game.engine.actor.Path;
 import com.toast.game.engine.interfaces.Updatable;
 import com.toast.xml.XmlNode;
+import com.toast.xml.exception.XmlFormatException;
 
 public class Follower extends Property implements Updatable
 {
@@ -175,7 +176,7 @@ public class Follower extends Property implements Updatable
    }
 
    @Override
-   public void deserialize(XmlNode node)
+   public void deserialize(XmlNode node) throws XmlFormatException
    {
       super.deserialize(node);
    }

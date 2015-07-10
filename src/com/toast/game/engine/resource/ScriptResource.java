@@ -1,6 +1,5 @@
 package com.toast.game.engine.resource;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -8,20 +7,15 @@ import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.imageio.ImageIO;
-
-import com.toast.xml.XmlNode;
-import com.toast.xml.exception.XmlFormatException;
-
-public class ImageResource extends Resource
+public class ScriptResource extends Resource
 {
    // **************************************************************************
-   //                                Public (static)
+   //                                  Public
    // **************************************************************************
    
-   public ImageResource create(String path) throws ResourceCreationException
+   public ScriptResource create(String path) throws ResourceCreationException
    {
-      ImageResource resource = null;
+      ScriptResource resource = null;
       
       if ((path == null) || (path.isEmpty()))
       {
@@ -34,7 +28,7 @@ public class ImageResource extends Resource
          
          String id = resourcePath.getFileName().toString();
          
-         resource = new ImageResource(id);
+         resource = new ScriptResource(id);
          resource.load(path);
          
          Resource.addResource(resource);
@@ -49,9 +43,9 @@ public class ImageResource extends Resource
       return (resource);
    }
    
-   public static ImageResource getResource(String id)
+   public static ScriptResource getResource(String id)
    {
-      ImageResource resource = null;
+      ScriptResource resource = null;
       
       if (resources.containsKey(id) == false)
       {
@@ -61,7 +55,7 @@ public class ImageResource extends Resource
       {
          try
          {
-            resource = (ImageResource)Resource.getResource(id);
+            resource = (ScriptResource)Resource.getResource(id);
          }
          catch (ClassCastException e)
          {
@@ -71,21 +65,22 @@ public class ImageResource extends Resource
       
       return (resource);
    }
+
    
    // **************************************************************************
    //                                  Public
    // **************************************************************************
-
-   public ImageResource(String id)
+   
+   public ScriptResource(String id)
    {
       super(id);
    }
    
-   public BufferedImage getImage()
+   public File getFile()
    {
-      return (image);
+      return (scriptFile);
    }
-
+   
    // **************************************************************************
    //                         Resource override
 
@@ -111,7 +106,7 @@ public class ImageResource extends Resource
             throw (new FileNotFoundException(String.format("Resource file [%s] is not a file.", resourceFile.toString())));
          }
          
-         image = ImageIO.read(resourceFile);
+         scriptFile = resourceFile;
            
          setLoaded(true);
       }
@@ -126,31 +121,10 @@ public class ImageResource extends Resource
    }
 
    @Override
-   public void save(String path) throws IOException
+   public void save(String path)
    {
       // TODO Auto-generated method stub
-      
-   }
-   
-   // **************************************************************************
-   //                       xml.Serializable interface
-   
-   @Override
-   public String getNodeName()
-   {
-      return ("image");
-   }
 
-   @Override
-   public XmlNode serialize(XmlNode node)
-   {
-      return (super.serialize(node));
-   }
-
-   @Override
-   public void deserialize(XmlNode node) throws XmlFormatException
-   {
-      super.deserialize(node);
    }
    
    // **************************************************************************
@@ -159,5 +133,5 @@ public class ImageResource extends Resource
    
    private final static Logger logger = Logger.getLogger(Resource.class.getName());
    
-   private BufferedImage image;
+   File scriptFile = null;
 }
