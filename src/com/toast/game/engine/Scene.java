@@ -91,16 +91,6 @@ public class Scene implements Updatable, Serializable
       }
       
       Path resourcePath = Resource.getPath(path);
-      File resourceFile = resourcePath.toFile();
-      
-      if (resourceFile.exists() == false)
-      {
-         throw (new FileNotFoundException(String.format("Resource path [%s] does not exist.", resourceFile.toString())));
-      }
-      else if (resourceFile.isDirectory() == false)
-      {
-         throw (new FileNotFoundException(String.format("Resource path [%s] is not a directory.", resourceFile.toString())));
-      }
       
       XmlDocument document = new XmlDocument();
       

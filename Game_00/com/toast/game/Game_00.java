@@ -39,39 +39,6 @@ public class Game_00
       {
       }
       
-      /*
-      Interpreter interpreter = new Interpreter();
-      try
-      {
-         interpreter.source(ScriptResource.getResource("saveGame.bsh").getFile().getAbsolutePath());
-      } 
-      catch (FileNotFoundException e)
-      {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      }
-      catch (IOException e)
-      {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      }
-      catch (EvalError e)
-      {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
-      }
-      
-      try
-      {
-         interpreter.eval("handleMessage()");
-      } 
-      catch (EvalError e1)
-      {
-         // TODO Auto-generated catch block
-         e1.printStackTrace();
-      }
-      */
-      
       Game.create("Game_00", (int)SCREEN_DIMENSION.getWidth(), (int)SCREEN_DIMENSION.getHeight(), 1);
       
       Scene levelOne = new Scene("level 1");
