@@ -87,7 +87,7 @@ public class SceneTest
    public void testLoad() throws IOException, URISyntaxException, XmlParseException, XmlFormatException
    {
       Scene scene = new Scene(sceneId);
-      scene.load("/resources/scenes/testScene_00.xml");
+      scene.load(Resource.getFile("/resources/scenes/testScene_00.xml"));
       
       assertTrue(scene.getId().equals(sceneId));
       assertTrue(scene.getActor(actorId) != null);

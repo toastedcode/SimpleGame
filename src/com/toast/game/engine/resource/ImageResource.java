@@ -19,36 +19,6 @@ public class ImageResource extends Resource
    //                                Public (static)
    // **************************************************************************
    
-   public ImageResource create(String path) throws ResourceCreationException
-   {
-      ImageResource resource = null;
-      
-      if ((path == null) || (path.isEmpty()))
-      {
-         throw (new IllegalArgumentException("Null source specified."));
-      }
-      
-      try
-      {
-         Path resourcePath = getPath(path);
-         
-         String id = resourcePath.getFileName().toString();
-         
-         resource = new ImageResource(id);
-         resource.load(path);
-         
-         Resource.addResource(resource);
-         
-         logger.log(Level.INFO, String.format("Created image resource [%s].", id));
-      }
-      catch (IOException e)
-      {
-         throw (new ResourceCreationException(e));
-      }
-        
-      return (resource);
-   }
-   
    public static ImageResource getResource(String id)
    {
       ImageResource resource = null;
@@ -90,34 +60,31 @@ public class ImageResource extends Resource
    //                         Resource override
 
    @Override
-   public void load(String path) throws ResourceCreationException
+   public void load(File file) throws ResourceCreationException
    {
-      if ((path == null) || (path.isEmpty()))
+      if (file == null)
       {
-         throw (new IllegalArgumentException("Null path specified."));
+         throw (new IllegalArgumentException("Null file specified."));
       }
       
       try
       {
-         Path resourcePath = getPath(path);
-         File resourceFile = resourcePath.toFile();
-         
-         if (resourceFile.exists() == false)
+         if (file.exists() == false)
          {
-            throw (new FileNotFoundException(String.format("Resource file [%s] does not exist.", resourceFile.toString())));
+            throw (new FileNotFoundException(String.format("Resource file [%s] does not exist.", file.toString())));
          }
-         else if (resourceFile.isFile() == false)
+         else if (file.isFile() == false)
          {
-            throw (new FileNotFoundException(String.format("Resource file [%s] is not a file.", resourceFile.toString())));
+            throw (new FileNotFoundException(String.format("Resource file [%s] is not a file.", file.toString())));
          }
          
-         image = ImageIO.read(resourceFile);
+         image = ImageIO.read(file);
            
          setLoaded(true);
       }
       catch (IOException e)
       {
-         logger.log(Level.WARNING, String.format("Failed to load image [%s].", path.toString()));
+         logger.log(Level.WARNING, String.format("Failed to load image [%s].", file.toString()));
          
          setLoaded(false);
          
@@ -126,7 +93,7 @@ public class ImageResource extends Resource
    }
 
    @Override
-   public void save(String path) throws IOException
+   public void save(File file) throws IOException
    {
       // TODO Auto-generated method stub
       

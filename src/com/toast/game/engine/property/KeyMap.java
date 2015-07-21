@@ -26,6 +26,8 @@ public class KeyMap extends Property implements MessageHandler
    public KeyMap(XmlNode node) throws XmlFormatException
    {
       super(node);
+      
+      deserializeThis(node);
    }
    
    public void mapKey(int keyId, String messageId)
@@ -73,11 +75,9 @@ public class KeyMap extends Property implements MessageHandler
    //                        xml.Serializable interface
    
    /*
-   <motor id="">
-      <keyMap>
-         <key keyId=""></key>
-      </keyMap>
-   </motor>
+   <keyMap id="">
+      <key keyId="" messageId=""/>
+   </keyMap>
    */
    
    @Override
@@ -114,16 +114,7 @@ public class KeyMap extends Property implements MessageHandler
    {
       super.deserialize(node);
       
-      //
-      // keyMap
-      //
-      
-      XmlNodeList keyNodes = node.getChildren("key");
-      
-      for (XmlNode keyNode : keyNodes)
-      {
-         mapKey(keyNode.getAttribute("keyId").getIntValue(), keyNode.getValue());
-      }
+      deserializeThis(node);
    }
    
    // **************************************************************************
@@ -148,5 +139,31 @@ public class KeyMap extends Property implements MessageHandler
       }
    }
    
-   Map<Integer, String> keyMap = new HashMap<>();
+   // **************************************************************************
+   //                                 Private
+   // **************************************************************************
+   
+   private void deserializeThis(XmlNode node) throws XmlFormatException
+   {
+      //
+      // keyMap
+      //
+      
+      XmlNodeList keyNodes = node.getChildren("key");
+      
+      for (XmlNode keyNode : keyNodes)
+      {
+         if (keyNode.hasAttribute("keyChar"))
+         {
+            int keyId = KeyEvent.getExtendedKeyCodeForChar(keyNode.getAttribute("keyChar").getCharacterValue());
+            mapKey(keyId, keyNode.getAttribute("messageId").getValue());
+         }
+         else
+         {
+            mapKey(keyNode.getAttribute("keyId").getIntValue(), keyNode.getAttribute("messageId").getValue());
+         }
+      }
+   }
+   
+   private Map<Integer, String> keyMap = new HashMap<>();
 }

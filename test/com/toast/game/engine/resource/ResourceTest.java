@@ -1,15 +1,16 @@
 package com.toast.game.engine.resource;
 
+import java.io.File;
 import java.io.IOException;
 
 import static org.junit.Assert.*;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.toast.game.engine.resource.Resource;
 import com.toast.xml.XmlDocument;
 import com.toast.xml.XmlNode;
-import com.toast.xml.exception.XmlFormatException;
 
 public class ResourceTest
 {
@@ -26,15 +27,63 @@ public class ResourceTest
       }
 
       @Override
-      public void load(String path)
+      public void load(File file)
       {
          setLoaded(true);
       }
 
       @Override
-      public void save(String path)
+      public void save(File file)
       {
       }
+   }
+   
+   @Before
+   public void resetResourcePath() throws IOException
+   {
+      String defaultResourcePath = Resource.class.getResource("/").getPath();
+      defaultResourcePath = defaultResourcePath.replace("%20", " ");
+      File file = new File(defaultResourcePath);
+      defaultResourcePath = file.getAbsolutePath();
+      
+      Resource.setResourcePath(defaultResourcePath);
+   }
+   
+   @Test
+   public void testGetResourcePath()
+   {
+      String defaultResourcePath = Resource.class.getResource("/").getPath();
+      defaultResourcePath = defaultResourcePath.replace("%20", " ");
+      File file = new File(defaultResourcePath);
+      defaultResourcePath = file.getAbsolutePath();
+      
+      String resourcePath = Resource.getResourcePath();
+      
+      
+      System.out.format("Default resource path: %s\n", defaultResourcePath);
+      System.out.format("Default resource path: %s\n", resourcePath);
+      
+      assertTrue(resourcePath.equals(defaultResourcePath));
+      
+      System.out.format("Default resource path: %s\n", resourcePath);
+   }
+   
+   @Test
+   public void testSetResourcePath_Valid() throws IOException
+   {
+      String resourcePath = Resource.getResourcePath() + "\\resources";
+      
+      Resource.setResourcePath(resourcePath);
+      
+      assertTrue(Resource.getResourcePath().equals(resourcePath));
+      
+      System.out.format("New resource path: %s\n", Resource.getResourcePath());
+   }
+   
+   @Test(expected=IOException.class)
+   public void testSetResourcePath_Invalid() throws IOException
+   {
+      Resource.setResourcePath("C:/NonexistentDirectory");
    }
    
    @Test
@@ -78,7 +127,9 @@ public class ResourceTest
       
       assertFalse(resource.isLoaded());
       
-      resource.load("/resources/myResource.txt");
+      File file = new File(Resource.getResourcePath() + "/resources/myResource.txt");
+      
+      resource.load(file);
       
       assertTrue(resource.isLoaded());
    }
@@ -87,7 +138,8 @@ public class ResourceTest
    public void testSerializeParse() throws ResourceCreationException
    {
       Resource resource = new TestResource("myResource");
-      resource.load("/resources/myResource.txt");
+      File file = new File(Resource.getResourcePath() + "/resources/myResource.txt");
+      resource.load(file);
       
       XmlDocument document = new XmlDocument();
       XmlNode root = document.createRootNode("resources");
@@ -97,5 +149,11 @@ public class ResourceTest
       Resource otherResource = new TestResource(node);
       
       assertTrue(resource.getId().contentEquals(otherResource.getId()));
+   }
+   
+   @Test
+   public void testXmlLoadSave()
+   {
+      // TODO
    }
 }

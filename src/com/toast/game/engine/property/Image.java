@@ -105,10 +105,9 @@ public class Image extends Property implements Drawable
    //                        xml.Serializable interface
    
    /*
-   <image id="walk">
-      <image></image>
+   <image id="" resource="">
       <isVisible></isVisible>
-   </animation>
+   </image>
    */
    
    @Override
@@ -125,7 +124,7 @@ public class Image extends Property implements Drawable
       // resource
       if (resource != null)
       {
-         propertyNode.setAttribute("src",  resource.getId());
+         propertyNode.setAttribute("resource",  resource.getId());
       }
 
       // isVisible

@@ -13,6 +13,9 @@
             <message id="msgKEY_PRESSED"/>
          </mailbox>
          <image id="imgPlayer" resource="player.png"/>
+         <keyMap id="keyMap">
+            <key keyChar="s" messageId="msgSAVE"/>
+         </keyMap>
          <motor id="motor">
             <keyMap>
                <key keyId="65">LEFT</key>

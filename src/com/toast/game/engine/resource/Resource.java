@@ -24,9 +24,60 @@ import com.toast.xml.exception.XmlFormatException;
 public abstract class Resource implements Serializable
 {
 
-// **************************************************************************
-//                              Public (static)
-// **************************************************************************
+   // **************************************************************************
+   //                              Public (static)
+   // **************************************************************************
+   
+   public static void setResourcePath(String srcPath) throws IOException
+   {
+      if ((srcPath == null) || (srcPath.isEmpty()))
+      {
+         throw (new IllegalArgumentException("Null path specified."));
+      }
+      
+      File file = new File(srcPath);
+      
+      if (file.exists() == false)
+      {
+         throw (new NoSuchFileException(String.format("Resource path [%s] does not exist.", file.toString())));
+      }
+      else if (file.isDirectory() == false)
+      {
+         throw (new NoSuchFileException(String.format("Resource path [%s] is not a directory.", file.toString())));
+      }
+      
+      resourcePath = file.getAbsolutePath();
+   }
+   
+   public static String getResourcePath()
+   {
+      return (resourcePath);
+   }
+   
+   public static File getFile(String path)
+   {
+      File file = null;
+      
+      if ((path == null) || (path.isEmpty()))
+      {
+         throw (new IllegalArgumentException("Null path specified."));
+      }
+      
+      if (path.startsWith("/"))
+      {
+         // Specifies a path relative to the resource path.
+         
+         file = new File(resourcePath + path);
+      }
+      else
+      {
+         // Specifies an absolute path.
+         
+         file = new File(path);
+      }
+      
+      return (file);
+   }
 
    public static void loadResources(String path) throws ResourceCreationException
    {
@@ -87,21 +138,20 @@ public abstract class Resource implements Serializable
             throw (new IllegalArgumentException("Null path specified."));
          }
    
-         Path resourcePath = getPath(path);
-         File resourceFile = resourcePath.toFile();
+         File file = getFile(path);
          
-         if (resourceFile.exists() == false)
+         if (file.exists() == false)
          {
-            throw (new FileNotFoundException(String.format("Resource file [%s] does not exist.", resourceFile.toString())));
+            throw (new FileNotFoundException(String.format("Resource file [%s] does not exist.", file.toString())));
          }
-         else if (resourceFile.isFile() == false)
+         else if (file.isFile() == false)
          {
-            throw (new FileNotFoundException(String.format("Resource file [%s] is not a file.", resourceFile.toString())));
+            throw (new FileNotFoundException(String.format("Resource file [%s] is not a file.", file.toString())));
          }
          
-         String id = resourcePath.getFileName().toString();
+         String id = file.getName();
          
-         resource = createResource(id, path);
+         resource = createResource(id, file);
       }
       catch (FileNotFoundException e)
       {
@@ -110,31 +160,32 @@ public abstract class Resource implements Serializable
       
       return (resource);
    }
-   
-   static public Resource createResource(String id, String path) throws ResourceCreationException
+
+   static public Resource createResource(String id, File file) throws ResourceCreationException
    {
       Resource resource = null;
       
       try
       {
-         if ((path == null) || (path.isEmpty()))
+         if ((id == null) || (id.isEmpty()))
          {
-            throw (new IllegalArgumentException("Null path specified."));
+            throw (new IllegalArgumentException("Null id specified."));
          }
-   
-         Path resourcePath = getPath(path);
-         File resourceFile = resourcePath.toFile();
-         
-         if (resourceFile.exists() == false)
+         else if (file == null)
          {
-            throw (new FileNotFoundException(String.format("Resource file [%s] does not exist.", resourceFile.toString())));
-         }
-         else if (resourceFile.isFile() == false)
-         {
-            throw (new FileNotFoundException(String.format("Resource file [%s] is not a file.", resourceFile.toString())));
+            throw (new IllegalArgumentException("Null file specified."));
          }
          
-         String extension = getExtension(path);
+         if (!file.exists())
+         {
+            throw (new FileNotFoundException(String.format("Resource file [%s] does not exist.", file.toString())));
+         }
+         else if (!file.isFile())
+         {
+            throw (new FileNotFoundException(String.format("Resource file [%s] is not a file.", file.toString())));
+         }
+         
+         String extension = getExtension(file.getAbsolutePath());
          
          switch (extension)
          {
@@ -155,13 +206,13 @@ public abstract class Resource implements Serializable
             default:
             {
                logger.log(Level.WARNING, 
-                          String.format("Unsupported file type [%s] for resource [%s].", path.toString(), id));
+                          String.format("Unsupported file type [%s] for resource [%s].", file.getAbsolutePath(), id));
             }
          }
          
          if (resource != null)
          {
-            resource.load(path);
+            resource.load(file);
             
             addResource(resource);
             
@@ -202,6 +253,14 @@ public abstract class Resource implements Serializable
       }
       
       return (resource);
+   }
+   
+   static public String getLocalPath()
+   {
+      final String HEX_SPACE_STRING = "%20";
+      final String SPACE = " ";
+      
+      return (Resource.class.getResource("/").getPath().replace(HEX_SPACE_STRING, SPACE));
    }
    
    static public Path getPath(String pathString) throws FileNotFoundException
@@ -253,7 +312,7 @@ public abstract class Resource implements Serializable
       {
          deserialize(node);
       
-         load(path);
+         //load(getFile(path));
       }
       catch (XmlFormatException e)
       {
@@ -276,9 +335,9 @@ public abstract class Resource implements Serializable
       return (isLoaded);
    }
    
-   public abstract void load(String path) throws ResourceCreationException;
+   public abstract void load(File file) throws ResourceCreationException;
    
-   public abstract void save(String path) throws IOException;
+   public abstract void save(File file) throws IOException;
    
    // **************************************************************************
    //                       xml.Serializable interface
@@ -337,7 +396,20 @@ public abstract class Resource implements Serializable
    //                                 Private
    // **************************************************************************
    
+   private static String getDefaultResourcePath()
+   {
+      String pathString = ResourceExperiments.class.getResource("/").getPath();
+      
+      pathString = pathString.replace("%20", " ");
+      
+      File file = new File(pathString);
+      
+      return (file.getAbsolutePath());
+   }
+ 
    private final static Logger logger = Logger.getLogger(Resource.class.getName());
+   
+   static String resourcePath = getDefaultResourcePath();
    
    static Map<String, Resource> resources = new HashMap<>();
    

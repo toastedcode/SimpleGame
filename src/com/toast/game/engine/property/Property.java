@@ -23,6 +23,7 @@ public class Property implements Serializable
          registerPropertyClass("motor", Motor.class);
          registerPropertyClass("mailbox", Mailbox.class);
          registerPropertyClass("script", Script.class);
+         registerPropertyClass("keyMap", KeyMap.class);
       }
       
       String propertyName = node.getName();

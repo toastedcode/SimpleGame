@@ -4,13 +4,10 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
 
 import com.toast.game.common.LockableMap;
 import com.toast.game.engine.actor.Actor;
 import com.toast.game.engine.interfaces.Updatable;
-import com.toast.game.engine.resource.Resource;
 import com.toast.xml.Serializable;
 import com.toast.xml.XmlDocument;
 import com.toast.xml.XmlNode;
@@ -57,47 +54,42 @@ public class Scene implements Updatable, Serializable
       drawList.draw(renderer);
    }
    
-   public void load(String path) throws IOException, XmlParseException, XmlFormatException
+   public void load(File file) throws IOException, XmlParseException, XmlFormatException
    {
-      if ((path == null) || (path.contentEquals("")))
+      if (file == null)
       {
-         throw (new IllegalArgumentException("Null path specified."));
+         throw (new IllegalArgumentException("Null file specified."));
       }
       
-      Path resourcePath = Resource.getPath(path);
-      File resourceFile = resourcePath.toFile();
-      
-      if (resourceFile.exists() == false)
+      if (file.exists() == false)
       {
-         throw (new FileNotFoundException(String.format("Resource file [%s] does not exist.", resourceFile.toString())));
+         throw (new FileNotFoundException(String.format("Resource file [%s] does not exist.", file.toString())));
       }
-      else if (resourceFile.isFile() == false)
+      else if (file.isFile() == false)
       {
-         throw (new FileNotFoundException(String.format("Resource file [%s] is not a file.", resourceFile.toString())));
+         throw (new FileNotFoundException(String.format("Resource file [%s] is not a file.", file.toString())));
       }
       
       XmlDocument document = new XmlDocument();
       
-      document.load(resourcePath);
+      document.load(file.getAbsolutePath());
       
       deserialize(document.getRootNode());
    }
    
-   public void save(String path) throws IOException, XmlSerializeException
+   public void save(File file) throws IOException, XmlSerializeException
    {
-      if ((path == null) || (path.contentEquals("")))
+      if (file == null)
       {
-         throw (new IllegalArgumentException("Null path specified."));
+         throw (new IllegalArgumentException("Null file specified."));
       }
-      
-      Path resourcePath = Resource.getPath(path);
       
       XmlDocument document = new XmlDocument();
       
       XmlNode rootNode = document.createRootNode("game");
       serialize(rootNode);
      
-      document.save(resourcePath);
+      document.save(file.getAbsolutePath());
    }
    
    // **************************************************************************

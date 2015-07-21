@@ -2,19 +2,14 @@ package com.toast.game;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.swing.JFrame;
-
-import bsh.EvalError;
-import bsh.Interpreter;
 
 import com.toast.game.engine.Game;
 import com.toast.game.engine.Scene;
 import com.toast.game.engine.resource.Resource;
 import com.toast.game.engine.resource.ResourceCreationException;
-import com.toast.game.engine.resource.ScriptResource;
 import com.toast.xml.exception.XmlFormatException;
 import com.toast.xml.exception.XmlParseException;
 
@@ -45,7 +40,7 @@ public class Game_00
       
       try
       {
-         levelOne.load("/resources/scenes/scene_00.xml");
+         levelOne.load(Resource.getFile("/resources/scenes/scene_00.xml"));
       }
       catch (IOException | XmlParseException | XmlFormatException e)
       {

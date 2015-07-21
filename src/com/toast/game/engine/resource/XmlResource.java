@@ -49,35 +49,32 @@ public class XmlResource extends Resource
    }
 
    @Override
-   public void load(String path) throws ResourceCreationException
+   public void load(File file) throws ResourceCreationException
    {
-      if ((path == null) || (path.isEmpty()))
+      if (file == null)
       {
-         throw (new IllegalArgumentException("Null path specified."));
+         throw (new IllegalArgumentException("Null file specified."));
       }
       
       try
       {
-         Path resourcePath = getPath(path);
-         File resourceFile = resourcePath.toFile();
-         
-         if (resourceFile.exists() == false)
+         if (file.exists() == false)
          {
-            throw (new FileNotFoundException(String.format("Resource file [%s] does not exist.", resourceFile.toString())));
+            throw (new FileNotFoundException(String.format("Resource file [%s] does not exist.", file.toString())));
          }
-         else if (resourceFile.isFile() == false)
+         else if (file.isFile() == false)
          {
-            throw (new FileNotFoundException(String.format("Resource file [%s] is not a file.", resourceFile.toString())));
+            throw (new FileNotFoundException(String.format("Resource file [%s] is not a file.", file.toString())));
          }
          
          document = new  XmlDocument();
-         document.load(resourcePath);
+         document.load(file.getAbsolutePath());
             
          setLoaded(true);
       }
       catch (IOException e)
       {
-         logger.log(Level.WARNING, String.format("Failed to load image [%s].", path.toString()));
+         logger.log(Level.WARNING, String.format("Failed to load image [%s].", file.getAbsolutePath()));
          
          setLoaded(false);
          
@@ -85,7 +82,7 @@ public class XmlResource extends Resource
       }
       catch (XmlParseException e)
       {
-         logger.log(Level.WARNING, String.format("Failed to parse XML document [%s].", path.toString()));
+         logger.log(Level.WARNING, String.format("Failed to parse XML document [%s].", file.getAbsolutePath()));
          
          setLoaded(false);
          
@@ -94,7 +91,7 @@ public class XmlResource extends Resource
    }
 
    @Override
-   public void save(String path)
+   public void save(File file)
    {
       // TODO Auto-generated method stub
       

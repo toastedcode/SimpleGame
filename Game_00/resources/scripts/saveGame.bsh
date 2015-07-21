@@ -1,5 +1,5 @@
-import java.awt.event.KeyEvent;
 import com.toast.game.engine.*;
+import com.toast.game.engine.resource.Resource;
 
 // **************************************************************************
 //                            Public Operations
@@ -7,15 +7,9 @@ import com.toast.game.engine.*;
 
 public void handleMessage()
 {
-   if (message.getMessageId().equals("msgKEY_PRESSED"))
+   if (message.getMessageId().equals("msgSAVE"))
    {
-      KeyEvent event = (KeyEvent)message.getPayload("keyEvent");
-      char keyChar = event.getKeyChar();
-      
-      if (keyChar == 's')
-      {
-         print("Saving ...\n");
-         Game.getCurrentScene().save("/resources/scenes/saved.xml");
-      }
+      print("Saving ...\n");
+      Game.getCurrentScene().save(Resource.getFile("/resources/scenes/saved.xml"));
    }
 }
