@@ -64,7 +64,7 @@ public class Animation extends Property implements Updatable, Drawable
       
       this.bufferedImage = bufferedImage;
       this.animationMap = animationMap;
-      ANIMATION_ID = animationId;
+      this.animationId = animationId;
       this.frameRate = frameRate;
       elapsedAnimationTime = 0;
       currentFrame = 0;
@@ -85,7 +85,7 @@ public class Animation extends Property implements Updatable, Drawable
       this.xmlResource = xmlResource;
       this.bufferedImage = imageResource.getImage();
       animationMap = new AnimationMap(xmlResource);
-      ANIMATION_ID = animationId;
+      this.animationId = animationId;
       this.frameRate = frameRate;
       elapsedAnimationTime = 0;
       currentFrame = 0;
@@ -93,12 +93,19 @@ public class Animation extends Property implements Updatable, Drawable
       animationType = AnimationType.NONE;
    }
    
+   public Animation(XmlNode node) throws XmlFormatException
+   {
+      super(node);
+      
+      deserializeThis(node);
+   }
+   
    public Property clone()
    {
       Animation clone = new Animation(getId(),
                                       bufferedImage,
                                       animationMap,
-                                      ANIMATION_ID,
+                                      animationId,
                                       frameRate);
       
       return (clone);
@@ -136,6 +143,16 @@ public class Animation extends Property implements Updatable, Drawable
    {
       animationType = AnimationType.NONE;
       currentFrame = 0;
+   }
+   
+   public AnimationType getAnimationType()
+   {
+      return (animationType);
+   }
+   
+   public AnimationDirection getAnimationDirection()
+   {
+      return (animationDirection);
    }
 
    // **************************************************************************
@@ -192,7 +209,7 @@ public class Animation extends Property implements Updatable, Drawable
          double scale = 1.0;
          
          // Retrieve the current frame.
-         AnimationMap.Frame frame = animationMap.getFrame(ANIMATION_ID,  currentFrame);
+         AnimationMap.Frame frame = animationMap.getFrame(animationId,  currentFrame);
          
          Rectangle sourceRectangle = new Rectangle(frame.getPosition(), frame.getDimension());
          
@@ -250,19 +267,26 @@ public class Animation extends Property implements Updatable, Drawable
    {
       XmlNode propertyNode = super.serialize(node);
       
-      // bufferedImage
+      // imageResource
       if (imageResource != null)
       {
-         propertyNode.appendChild("image", imageResource.getId());
+         propertyNode.setAttribute("imageResource",  imageResource.getId());
       }
       
+      // animationResource
       if (xmlResource != null)
       {
-         propertyNode.appendChild("animationMap", xmlResource.getId());
+         propertyNode.setAttribute("animationResource",  xmlResource.getId());
+      }
+      
+      // animationId
+      if (animationId.equals(getId()))
+      {
+         propertyNode.setAttribute("animationId", animationId);
       }
       
       // frameRate
-      propertyNode.appendChild("frameRate", frameRate);
+      propertyNode.setAttribute("frameRate", frameRate);
       
       // isVisible
       propertyNode.appendChild("isVisible", isVisible);
@@ -275,35 +299,7 @@ public class Animation extends Property implements Updatable, Drawable
    {
       super.deserialize(node);
       
-      // bufferedImage
-      if (node.hasChild("image"))
-      {
-         String resourceId = node.getChild("image").getValue();
-         imageResource = ImageResource.getResource(resourceId);
-         
-         if (imageResource != null)
-         {
-            bufferedImage = imageResource.getImage();
-         }
-      }
-      
-      // animationMap
-      if (node.hasChild("animationMap"))
-      {
-         String resourceId = node.getChild("animationMap").getValue();
-         xmlResource = XmlResource.getResource(resourceId);
-         
-         if (xmlResource != null)
-         {
-            animationMap = new AnimationMap(xmlResource);
-         }
-      }
-
-      // frameRate
-      frameRate = node.getChild("frameRate").getIntValue();
-      
-      // isVisible
-      isVisible = node.getChild("isVisible").getBoolValue();
+      deserializeThis(node);
    }
    
    // **************************************************************************
@@ -318,7 +314,7 @@ public class Animation extends Property implements Updatable, Drawable
    
    private int getEndFrame()
    {
-      return (animationMap.getNumberOfFrames(ANIMATION_ID) - 1);
+      return (animationMap.getNumberOfFrames(animationId) - 1);
    }
    
    
@@ -436,6 +432,52 @@ public class Animation extends Property implements Updatable, Drawable
               (isFinalFrame == true));
    }
    
+   public void deserializeThis(XmlNode node) throws XmlFormatException
+   {
+      // imageResource
+      if (node.hasAttribute("imageResource"))
+      {
+         String resourceId = node.getAttribute("imageResource").getValue();
+         imageResource = ImageResource.getResource(resourceId);
+         
+         if (imageResource != null)
+         {
+            bufferedImage = imageResource.getImage();
+         }
+      }
+      
+      // animationResource
+      if (node.hasAttribute("animationResource"))
+      {
+         String resourceId = node.getAttribute("animationResource").getValue();
+         xmlResource = XmlResource.getResource(resourceId);
+         
+         if (xmlResource != null)
+         {
+            animationMap = new AnimationMap(xmlResource);
+         }
+      }
+      
+      // animationId
+      if (node.hasAttribute("animationId"))
+      {
+         animationId = node.getAttribute("animationId").getValue();         
+      }
+      else
+      {
+         animationId = getId();
+      }
+
+      // frameRate
+      frameRate = node.getAttribute("frameRate").getIntValue();
+      
+      // isVisible
+      if (node.hasChild("isVisible"))
+      {
+         isVisible = node.getChild("isVisible").getBoolValue();
+      }  
+   }
+   
    // **************************************************************************
    //                          Private Attributes
    // **************************************************************************
@@ -451,7 +493,7 @@ public class Animation extends Property implements Updatable, Drawable
 
    private AnimationMap animationMap;
    
-   private final String ANIMATION_ID;
+   private String animationId;
    
    // The speed (frames per second) at which the Animation should be played.
    private int frameRate;
@@ -462,10 +504,10 @@ public class Animation extends Property implements Updatable, Drawable
    private int currentFrame;
    
    // The direction of animation.
-   private AnimationDirection animationDirection;
+   private AnimationDirection animationDirection = AnimationDirection.FORWARD;
    
    // An enumeration determining how the Animation should animate.
-   private AnimationType animationType;
+   private AnimationType animationType = AnimationType.NONE;
    
    private boolean isVisible = true;
 }

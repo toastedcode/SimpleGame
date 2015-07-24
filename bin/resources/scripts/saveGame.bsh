@@ -10,6 +10,16 @@ public void handleMessage()
    if (message.getMessageId().equals("msgSAVE"))
    {
       print("Saving ...\n");
+      
       Game.getCurrentScene().save(Resource.getFile("/resources/scenes/saved.xml"));
+   }
+   
+   if (message.getMessageId().equals("msgLOAD"))
+   {
+      print("Loading ...\n");
+      
+      Scene levelOne = new Scene("saved");
+      levelOne.load(Resource.getFile("/resources/scenes/saved.xml"));
+      Game.setCurrentScene(levelOne);
    }
 }

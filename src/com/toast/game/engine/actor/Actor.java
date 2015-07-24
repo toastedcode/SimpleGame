@@ -312,12 +312,15 @@ public class Actor implements Updatable, Movable, Mailable, Serializable
       actorNode.appendChild("isEnabled").setValue(Boolean.toString(isEnabled));
       
       // position
+      XmlNode childNode = actorNode.appendChild("position");
+      childNode.setAttribute("x",  (int)position.getX());
+      childNode.setAttribute("y",  (int)position.getY());
       
       // zOrder
       actorNode.appendChild("zOrder").setValue(Integer.toString(zOrder));
       
       // properties
-      XmlNode childNode = actorNode.appendChild("properties");
+      childNode = actorNode.appendChild("properties");
       for (Property property : properties.values())
       {
          property.serialize(childNode);
@@ -407,5 +410,5 @@ public class Actor implements Updatable, Movable, Mailable, Serializable
    
    private Rectangle2D.Double bounds = new Rectangle2D.Double(0, 0, 0, 0);
    
-   Mailbox mailbox = null;
+   private Mailbox mailbox = null;
 }

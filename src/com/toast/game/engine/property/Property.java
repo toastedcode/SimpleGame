@@ -20,6 +20,8 @@ public class Property implements Serializable
       if (propertyClasses.isEmpty())
       {
          registerPropertyClass("image", Image.class);
+         registerPropertyClass("animation", Animation.class);
+         registerPropertyClass("animationGroup", AnimationGroup.class);
          registerPropertyClass("motor", Motor.class);
          registerPropertyClass("mailbox", Mailbox.class);
          registerPropertyClass("script", Script.class);

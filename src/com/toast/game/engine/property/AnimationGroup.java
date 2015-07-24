@@ -5,11 +5,17 @@ import java.awt.Graphics;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.toast.game.engine.AnimationMap;
 import com.toast.game.engine.interfaces.Updatable;
 import com.toast.game.engine.interfaces.Drawable;
 import com.toast.game.engine.property.Animation;
 import com.toast.game.engine.property.Animation.AnimationDirection;
 import com.toast.game.engine.property.Animation.AnimationType;
+import com.toast.game.engine.resource.ImageResource;
+import com.toast.game.engine.resource.XmlResource;
+import com.toast.xml.XmlNode;
+import com.toast.xml.XmlNodeList;
+import com.toast.xml.exception.XmlFormatException;
 
 public class AnimationGroup extends Property implements Updatable, Drawable
 {
@@ -20,6 +26,13 @@ public class AnimationGroup extends Property implements Updatable, Drawable
    public AnimationGroup(String id)
    {
       super(id);
+   }
+   
+   public AnimationGroup(XmlNode node) throws XmlFormatException
+   {
+      super(node);
+      
+      deserializeThis(node);
    }
    
    public void addAnimation(Animation animation)
@@ -102,12 +115,90 @@ public class AnimationGroup extends Property implements Updatable, Drawable
    }
    
    // **************************************************************************
+   //                        xml.Serializable interface
+   
+   /*
+   <animation id="walk">
+      <image></image>
+      <animationMap></animationMap>
+      <frameRate></frameRate>
+      <isVisible></isVisible>
+   </animation>
+   */
+   
+   @Override
+   public String getNodeName()
+   {
+      return("animationGroup");
+   }
+   
+   @Override
+   public XmlNode serialize(XmlNode node)
+   {
+      XmlNode propertyNode = super.serialize(node);
+      
+      // animations
+      for (Animation animation : animations.values())
+      {
+         animation.serialize(propertyNode);
+      }
+
+      // currrentAnimation
+      if (currentAnimation != null)
+      {
+         XmlNode childNode = node.appendChild("currentAnimation"); 
+         childNode.setAttribute("id", currentAnimation.getId());
+         childNode.setAttribute("type", currentAnimation.getAnimationType());
+         childNode.setAttribute("direction", currentAnimation.getAnimationDirection());
+      }
+
+      
+      return (propertyNode);
+   }
+
+   @Override
+   public void deserialize(XmlNode node) throws XmlFormatException
+   {
+      super.deserialize(node);
+      
+      deserializeThis(node);
+   }
+   
+   // **************************************************************************
    //                                Protected
    // **************************************************************************
    
    // **************************************************************************
    //                                 Private
    // **************************************************************************
+   
+   public void deserializeThis(XmlNode node) throws XmlFormatException
+   {
+      // animations
+      XmlNodeList animationNodes = node.getChildren("animation");
+      for (XmlNode animationNode : animationNodes)
+      {
+         addAnimation(new Animation(animationNode));
+      }
+      
+      // currentAnimation
+      if (node.hasChild("currentAnimation"))
+      {
+         XmlNode childNode = node.getChild("currentAnimation");
+         
+         String animationId = childNode.getAttribute("id").getValue();
+         AnimationType animationType = AnimationType.valueOf(childNode.getAttribute("type").getValue());
+         AnimationDirection animationDirection = AnimationDirection.valueOf(childNode.getAttribute("direction").getValue());
+         
+         setAnimation(animationId, animationType, animationDirection);
+      }
+      
+      // isVisible
+      if (node.hasChild("isVisible"))
+      {
+         isVisible = node.getChild("isVisible").getBoolValue();
+      }  
+   }
    
    Map<String, Animation> animations = new HashMap<>();
    

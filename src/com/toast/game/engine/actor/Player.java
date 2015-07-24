@@ -6,6 +6,7 @@ import java.util.Map;
 import com.toast.game.common.Direction;
 import com.toast.game.engine.message.Message;
 import com.toast.game.engine.message.MessageHandler;
+import com.toast.game.engine.property.AnimationGroup;
 import com.toast.game.engine.property.Property;
 import com.toast.game.engine.property.Animation;
 import com.toast.xml.XmlNode;
@@ -24,7 +25,17 @@ public class Player extends Actor
       RUN,
       CROUCH,
       JUMP,
-      FIRE
+      FIRE,
+      DAMAGE,
+      DIE
+   }
+   
+   public enum Facing
+   {
+      UP,
+      DOWN,
+      LEFT,
+      RIGHT,
    }
    
    // **************************************************************************
@@ -153,10 +164,20 @@ public class Player extends Actor
    // **************************************************************************
    //                                Private
    // **************************************************************************
+   
+   public void updateAnimation(Action action, Direction direction)
+   {
+      AnimationGroup animationGroup = (AnimationGroup)getProperty("playerAnimations");
+      
+      if (animationGroup != null)
+      {
+         
+      }
+   }
 
    private Map<Action, Map<Direction, Animation>> animations = new HashMap<>();
    
    private Action action = Action.IDLE;
    
-   private Action direction = null;
+   private Facing facing = Facing.RIGHT;
 }

@@ -87,7 +87,16 @@ public class Scene implements Updatable, Serializable
       XmlDocument document = new XmlDocument();
       
       XmlNode rootNode = document.createRootNode("game");
-      serialize(rootNode);
+      XmlNode sceneNode = serialize(rootNode);
+      
+      try
+      {
+         document.parse(sceneNode.toString());
+      }
+      catch (XmlParseException e)
+      {
+         throw (new XmlSerializeException(e));
+      }
      
       document.save(file.getAbsolutePath());
    }

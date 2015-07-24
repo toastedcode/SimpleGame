@@ -135,7 +135,7 @@ public class KeyMap extends Property implements MessageHandler
       if (keyMap.containsKey(event.getKeyCode()) == true)
       {
          String messageId = keyMap.get(event.getKeyCode());
-         Messenger.sendMessage(new Message(messageId, getId(), getParent().getId(), new Message.Parameter("isKePressed", false)));
+         Messenger.sendMessage(new Message(messageId, getId(), getParent().getId(), new Message.Parameter("isKeyPressed", false)));
       }
    }
    
@@ -160,7 +160,7 @@ public class KeyMap extends Property implements MessageHandler
          }
          else
          {
-            mapKey(keyNode.getAttribute("keyId").getIntValue(), keyNode.getAttribute("messageId").getValue());
+            mapKey(keyNode.getAttribute("keyId").getIntValue(), keyNode.getValue());
          }
       }
    }

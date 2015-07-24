@@ -15,6 +15,7 @@
          <image id="imgPlayer" resource="player.png"/>
          <keyMap id="keyMap">
             <key keyChar="s" messageId="msgSAVE"/>
+            <key keyChar="l" messageId="msgLOAD"/>
          </keyMap>
          <motor id="motor">
             <keyMap>

@@ -85,6 +85,12 @@ public class Mailbox extends Property implements Updatable
    // **************************************************************************
    //                        xml.Serializable interface
    
+   /*
+   <mailbox id="mailbox">
+      <message id="msgKEY_PRESSED"/>
+   </mailbox>
+   */
+   
    @Override
    public String getNodeName()
    {
@@ -96,7 +102,10 @@ public class Mailbox extends Property implements Updatable
    {
       XmlNode propertyNode = super.serialize(node);
       
-      // TODO.
+      for (String messageId : registerForMessages)
+      {
+         propertyNode.appendChild("message").setAttribute("id",  messageId);
+      }
       
       return (propertyNode);
    }
