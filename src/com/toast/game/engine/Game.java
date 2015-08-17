@@ -25,6 +25,11 @@ public class Game
       createGameLoop();      
    }
    
+   public String getTitle()
+   {
+      return (title);
+   }
+   
    public static void add(Scene scene)
    {
       scenes.put(scene.getId(), scene);

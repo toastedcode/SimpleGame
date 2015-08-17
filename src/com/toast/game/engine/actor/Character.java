@@ -1,11 +1,17 @@
 package com.toast.game.engine.actor;
 
-import com.toast.game.engine.message.Message;
-import com.toast.game.engine.message.MessageHandler;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.toast.game.engine.property.Animation.AnimationDirection;
+import com.toast.game.engine.property.Animation.AnimationType;
+import com.toast.game.engine.property.AnimationGroup;
+import com.toast.game.engine.property.Property;
 import com.toast.xml.XmlNode;
+import com.toast.xml.XmlNodeList;
 import com.toast.xml.exception.XmlFormatException;
 
-public class Character extends Actor implements MessageHandler
+public class Character extends Actor
 {
    // **************************************************************************
    //                                Public
@@ -14,22 +20,53 @@ public class Character extends Actor implements MessageHandler
    public Character(String id)
    {
       super(id);
+   }
+   
+   public Character(XmlNode node) throws XmlFormatException
+   {
+      super(node);
       
-      /*
-       * state - stateId, animationId, 
-       */
+      deserializeThis(node);
       
-      mailbox.register(this);
+      updateAnimation();
+   }
+   
+   public String getState()
+   {
+      return (state);
+   }
+   
+   public void setState(String state)
+   {
+      if (this.state != state)
+      {
+         this.state = state;
+      
+         updateAnimation();
+      }
    }
    
    // **************************************************************************
    //                            Actor overrides
+   
+   public void add(Property property)
+   {
+      super.add(property);
+      
+      if (property instanceof AnimationGroup)
+      {
+         // By convention, a Character must have a single animation group.
+         animationGroup = (AnimationGroup)property;
+      }
+   }
    
    // **************************************************************************
    //                         xml.Serializable interface
    
    /*
    <character id="id">
+      <state/>
+      <direction/>
    </character>
    */
    
@@ -43,6 +80,23 @@ public class Character extends Actor implements MessageHandler
    {
       XmlNode playerNode = super.serialize(node);
       
+      // state
+      if ((state != null) && (!state.isEmpty()))
+      {
+         playerNode.appendChild("state",  state);
+      }
+      
+      // states
+      if (!states.isEmpty())
+      {
+         XmlNode statesNode = playerNode.appendChild("states");
+         
+         for (String state : states)
+         {
+            statesNode.appendChild("state").setAttribute("id",  state);
+         }
+      }
+      
       return (playerNode);
    }
 
@@ -50,32 +104,48 @@ public class Character extends Actor implements MessageHandler
    public void deserialize(XmlNode node) throws XmlFormatException
    {
       super.deserialize(node);
-   }
-
-   @Override
-   public void handleMessage(Message message)
-   {
-      switch (message.getMessageId())
-      {
-         case "LEFT_BUTTON":
-         case "RIGHT_BUTTON":
-         case "UP_BUTTON":
-         case "DOWN_BUTTON":
-         {
-            boolean isPressed = (Boolean)message.getPayload("isPressed");
-            handleActionKey(message.getMessageId(), isPressed);
-         }
-      }
+      
+      deserializeThis(node);
    }
    
    // **************************************************************************
    //                                Protected
    // **************************************************************************
    
-   protected void handleActionKey(String action, boolean isPressed)
+   protected void updateAnimation()
    {
-      
+      if ((state != null) &&
+          (animationGroup != null))
+      {
+         // By convention, animations should have the same id as their associated state.
+         animationGroup.setAnimation(state, AnimationType.LOOP, AnimationDirection.FORWARD);
+      }
    }
    
+   // **************************************************************************
+   //                                Private
+   // **************************************************************************
    
+   public void deserializeThis(XmlNode node) throws XmlFormatException
+   {
+      // state
+      state = node.getChild("state").getValue();
+      
+      // states
+      if (node.hasChild("states"))
+      {
+         XmlNodeList stateNodes = node.getChild("states").getChildren("state");
+         
+         for (XmlNode stateNode : stateNodes)
+         {
+            states.add(stateNode.getAttribute("id").getValue());
+         }
+      }
+   }
+   
+   private List<String> states = new ArrayList<>();
+   
+   private String state;
+   
+   AnimationGroup animationGroup;
 }

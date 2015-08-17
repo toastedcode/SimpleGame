@@ -5,14 +5,11 @@ import java.awt.Graphics;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.toast.game.engine.AnimationMap;
 import com.toast.game.engine.interfaces.Updatable;
 import com.toast.game.engine.interfaces.Drawable;
 import com.toast.game.engine.property.Animation;
 import com.toast.game.engine.property.Animation.AnimationDirection;
 import com.toast.game.engine.property.Animation.AnimationType;
-import com.toast.game.engine.resource.ImageResource;
-import com.toast.game.engine.resource.XmlResource;
 import com.toast.xml.XmlNode;
 import com.toast.xml.XmlNodeList;
 import com.toast.xml.exception.XmlFormatException;

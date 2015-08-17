@@ -26,9 +26,7 @@ public class Game_00
       // Resources
       try
       {
-         Resource.loadResource("/resources/images/background.png");
-         Resource.loadResource("/resources/images/player.png");
-         Resource.loadResource("/resources/scripts/saveGame.bsh");
+         Resource.loadResources("/resources/game_00/");
       }
       catch (ResourceCreationException e)
       {
@@ -40,7 +38,7 @@ public class Game_00
       
       try
       {
-         levelOne.load(Resource.getFile("/resources/scenes/scene_00.xml"));
+         levelOne.load(Resource.getFile("/resources/game_00/scenes/scene_00.xml"));
       }
       catch (IOException | XmlParseException | XmlFormatException e)
       {

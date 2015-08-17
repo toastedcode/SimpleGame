@@ -5,14 +5,17 @@
          <image id="imgBackground" resource="background.png"/>
       </properties>
    </actor>
-   <actor id="player">
+   <character id="player">
       <position x="0" y="200"/>
       <properties>
+         <script id="playerScript" resource="player.bsh"/>
+         <script id="saveGameScript" resource="saveGame.bsh"/>
          <mailbox id="mailbox">
             <message id="msgKEY_PRESSED"/>
+            <message id="msgKEY_RELEASED"/>
          </mailbox>
-         <animationGroup id="playerAnimations">
-            <currentAnimation id="walk_right" direction="FORWARD" type="LOOP"/>
+         <animationGroup id="characterAnimations">
+            <currentAnimation id="idle_right" direction="FORWARD" type="LOOP"/>
             <!--  Idle animations -->
             <animation id="idle_right" imageResource="camel.png" animationResource="camel.anim" frameRate="10"/>
             <animation id="idle_left" imageResource="camel.png" animationResource="camel.anim"  frameRate="10"/>
@@ -27,15 +30,30 @@
          <keyMap id="keyMap">
             <key keyChar="s" messageId="msgSAVE"/>
             <key keyChar="l" messageId="msgLOAD"/>
+            <key keyId="37" messageId="msgLEFT"/>
+            <key keyId="39" messageId="msgRIGHT"/>
+            <key keyId="38" messageId="msgUP"/>
+            <key keyId="40" messageId="msgDOWN"/>
          </keyMap>
          <motor id="motor">
             <keyMap>
-               <key keyId="65">LEFT</key>
-               <key keyId="68">RIGHT</key>
                <key keyId="37">LEFT</key>
                <key keyId="39">RIGHT</key>
+               <key keyId="38">UP</key>
+               <key keyId="40">DOWN</key>
             </keyMap>
          </motor>
       </properties>
-   </actor>
+      <states>
+         <state id="walk_right"/>
+         <state id="walk_left"/>
+         <state id="walk_up"/>
+         <state id="walk_down"/>
+         <state id="idle_left"/>
+         <state id="idle_right"/>
+         <state id="idle_up"/>
+         <state id="idle_down"/>
+      </states>
+      <state>idle_right</state>
+   </character>
 </scene>

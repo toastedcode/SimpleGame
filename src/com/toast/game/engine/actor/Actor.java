@@ -18,10 +18,10 @@ import com.toast.xml.XmlUtils;
 import com.toast.xml.exception.XmlFormatException;
 
 import java.awt.Dimension;
-import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -33,9 +33,35 @@ public class Actor implements Updatable, Movable, Mailable, Serializable
    {
       Actor actor = null;
       
-      // TODO: Implement factory.
+      if (actorClasses.isEmpty())
+      {
+         registerActorClass("actor", Actor.class);
+         registerActorClass("character", Character.class);
+      }
+      
+      String className = node.getName();
+
+      try
+      {
+         if (actorClasses.containsKey(className))
+         {
+            Class<?> actorClass = actorClasses.get(className);
+            
+            actor = (Actor)actorClass.getConstructor(XmlNode.class).newInstance(node);
+         }
+      }
+      catch (IllegalAccessException | InvocationTargetException | InstantiationException | NoSuchMethodException e)
+      {
+         logger.log(Level.WARNING, 
+                    String.format("Failed to create actor [%s] from node: \n.", className, node.toString()));
+      }
       
       return (actor);
+   }
+   
+   public static void registerActorClass(String actorName, Class<?> actorClass)
+   {
+      actorClasses.put(actorName, actorClass);
    }
    
    public Actor(String id)
@@ -43,15 +69,20 @@ public class Actor implements Updatable, Movable, Mailable, Serializable
       this.id = id;
    }
    
+   public Actor(XmlNode node) throws XmlFormatException
+   {
+      deserializeThis(node);
+   }
+
    public Actor clone(String id)
    {
       Actor clone = new Actor(id);
       
       clone.setVisible(isVisible);
       clone.setEnabled(isEnabled);
-      clone.setZOrder(zOrder);
       clone.setPosition(position);
-      clone.setBounds(bounds);
+      clone.setZOrder(zOrder);
+      clone.setDimension(dimension);
       
       // Clone properties.
       for (Property property : properties.values())
@@ -83,12 +114,69 @@ public class Actor implements Updatable, Movable, Mailable, Serializable
    
    public Point2D.Double getPosition()
    {
-      return (position);
+      return ((Point2D.Double)position.clone());
    }
    
    public void setPosition(Point2D.Double position)
    {
       this.position = (Point2D.Double)position.clone();
+   }
+   
+   public void setPosition(double x, double y)
+   {
+      position.setLocation(x,  y);
+   }
+   
+   public Point2D.Double getCenter()
+   {
+      return (new Point2D.Double((position.getX() + (getWidth() / 2)),
+                                 (position.getY() + (getHeight() / 2))));
+   }
+   
+   public void setCenter(Point2D.Double center)
+   {
+      setPosition((center.getX() - (getWidth() / 2)),
+                  (center.getY() - (getHeight() / 2)));
+   }
+      
+   public int getZOrder()
+   {
+      return (zOrder);
+   }
+   
+   public void setZOrder(int zOrder)
+   {
+      this.zOrder = zOrder;
+   }
+   
+   public Dimension getDimension()
+   {
+      return ((Dimension)dimension.clone());
+   }
+   
+   public int getWidth()
+   {
+      return ((int)dimension.getWidth());
+   }
+   
+   public int getHeight()
+   {
+      return ((int)dimension.getHeight());
+   }
+   
+   public void setDimension(Dimension dimension)
+   {
+      this.dimension = (Dimension)dimension.clone();
+   }
+   
+   public void setDimension(int width, int height)
+   {
+      dimension.setSize(width, height);
+   }
+   
+   public Rectangle2D.Double getBounds()
+   {
+      return (new Rectangle2D.Double(position.getX(), position.getY(), dimension.getWidth(), dimension.getHeight()));
    }
    
    public boolean isVisible()
@@ -111,30 +199,10 @@ public class Actor implements Updatable, Movable, Mailable, Serializable
       this.isEnabled = isEnabled;
    }
    
-   public int getZOrder()
-   {
-      return (zOrder);
-   }
-   
-   public void setZOrder(int zOrder)
-   {
-      this.zOrder = zOrder;
-   }
-   
    public int getLayer()
    {
       // TODO      
       return (0);
-   }
-   
-   public Rectangle2D.Double getBounds()
-   {
-      return (bounds);
-   }
-   
-   protected void setBounds(Rectangle2D.Double bounds)
-   {
-      this.bounds = (Rectangle2D.Double)bounds.clone();
    }
    
    public Dimension getScale()
@@ -152,7 +220,8 @@ public class Actor implements Updatable, Movable, Mailable, Serializable
       if (property instanceof Drawable)
       {
          Drawable drawable = (Drawable)property;
-         bounds.add(new Rectangle(0, 0, drawable.getWidth(), drawable.getHeight()));
+         setDimension((int)Math.max(getWidth(),  drawable.getWidth()),
+                      (int)Math.max(getHeight(),  drawable.getHeight()));
       }
       
       // TODO: Make this more OO, please!
@@ -332,6 +401,37 @@ public class Actor implements Updatable, Movable, Mailable, Serializable
    @Override
    public void deserialize(XmlNode node) throws XmlFormatException
    {
+      deserializeThis(node);
+   }
+   
+   protected AffineTransform getTransform()
+   {
+      AffineTransform transform = new AffineTransform();
+      transform.translate(getPosition().getX(), getPosition().getY());
+      transform.scale(getScale().getWidth(), getScale().getHeight());
+      
+      return (transform);
+   }
+   
+   private void addMailbox(Mailbox mailbox)
+   {
+      this.mailbox = mailbox;
+      
+      // Register all existing message handlers with the mailbox.
+      for (Property property : properties.values())
+      {
+         if (property instanceof MessageHandler)
+         {
+            mailbox.register((MessageHandler)property);
+         }
+      }
+      
+      // Register the actor to receive messages.
+      Messenger.register(this);
+   }
+   
+   private void deserializeThis(XmlNode node) throws XmlFormatException
+   {
       // id
       id = node.getAttribute("id").getValue();
       
@@ -364,33 +464,7 @@ public class Actor implements Updatable, Movable, Mailable, Serializable
                add(property);
             }
          }
-      }
-   }
-   
-   protected AffineTransform getTransform()
-   {
-      AffineTransform transform = new AffineTransform();
-      transform.translate(getPosition().getX(), getPosition().getY());
-      transform.scale(getScale().getWidth(), getScale().getHeight());
-      
-      return (transform);
-   }
-   
-   private void addMailbox(Mailbox mailbox)
-   {
-      this.mailbox = mailbox;
-      
-      // Register all existing message handlers with the mailbox.
-      for (Property property : properties.values())
-      {
-         if (property instanceof MessageHandler)
-         {
-            mailbox.register((MessageHandler)property);
-         }
-      }
-      
-      // Register the actor to receive messages.
-      Messenger.register(this);
+      }      
    }
    
    private final static Logger logger = Logger.getLogger(Property.class.getName());
@@ -401,14 +475,15 @@ public class Actor implements Updatable, Movable, Mailable, Serializable
    
    private boolean isEnabled = true;
    
+   private Point2D.Double position = new Point2D.Double(0, 0);
+   
    private int zOrder = 0;
    
-   // Temp.
-   private Point2D.Double position = new Point2D.Double(0, 0);
+   private Dimension dimension = new Dimension(0, 0);
    
    private Map<String, Property> properties = new HashMap<>();
    
-   private Rectangle2D.Double bounds = new Rectangle2D.Double(0, 0, 0, 0);
-   
    private Mailbox mailbox = null;
+   
+   private static Map<String, Class<?>> actorClasses = new HashMap<>();
 }

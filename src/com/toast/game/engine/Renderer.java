@@ -4,12 +4,15 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.awt.Dimension;
 import java.awt.image.ImageObserver;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
+import com.toast.game.engine.actor.Camera;
 import com.toast.game.engine.interfaces.Drawable;
 
 public class Renderer
@@ -53,12 +56,28 @@ public class Renderer
       int screenHeight,
       int numLayers)
    {
-      screenDimensions = new Dimension(screenWidth, screenHeight);
+      screenDimension = new Dimension(screenWidth, screenHeight);
       
       for (int layer = 0; layer < numLayers; layer++)
       {
          layers.add(new Layer(screenWidth, screenHeight));
       }
+   }
+   
+   public Dimension getScreenDimension()
+   {
+      return ((Dimension)screenDimension.clone());
+   }
+   
+   
+   public Rectangle getViewport()
+   {
+      return ((Rectangle)viewport.clone());
+   }
+   
+   public void setViewport(Rectangle viewport)
+   {
+      this.viewport = viewport;
    }
    
    public void clear()
@@ -72,11 +91,10 @@ public class Renderer
          layer.getGraphics().setPaint(Color.BLACK);
          layer.getGraphics().fillRect(0, 
                                       0, 
-                                      (int)screenDimensions.getWidth(), 
-                                      (int)screenDimensions.getHeight());
+                                      (int)screenDimension.getWidth(), 
+                                      (int)screenDimension.getHeight());
       }
    }
-
    
    public void paint(
       Graphics graphics,
@@ -95,8 +113,7 @@ public class Renderer
       graphics.setFont(font);
       graphics.drawString(Double.toString(Timing.getFrameRate()), 0,  15);
    }
-   
-   
+      
    public void draw(
       Drawable drawable,
       AffineTransform transform,
@@ -107,8 +124,21 @@ public class Renderer
       {
          Layer layer = layers.get(layerIndex);
          
-         // Transform
-         layer.getGraphics().setTransform(transform);
+         // Set transformation matrix to identity
+         layer.getGraphics().setTransform(IDENTITY_TRANSFORM);
+             
+         // Viewport transform
+         if (viewport != null)
+         {
+            AffineTransform viewportTransform = new AffineTransform();
+            viewportTransform.translate(-viewport.getX(), -viewport.getY());
+            viewportTransform.scale((viewport.getWidth() / screenDimension.getWidth()),
+                                   (viewport.getHeight() / screenDimension.getHeight()));
+            layer.getGraphics().transform(viewportTransform);
+         }
+      
+         // Object transform
+         layer.getGraphics().transform(transform);
          
          // Draw
          drawable.draw(layer.getGraphics());
@@ -124,10 +154,12 @@ public class Renderer
    // **************************************************************************
    
    // An identity transformation
-   private static final AffineTransform IDENTITY_TRANSFORM = new AffineTransform();   
+   private static final AffineTransform IDENTITY_TRANSFORM = new AffineTransform();
+   
+   private Rectangle viewport;
   
    // The dimensions (height, width) of the screen.
-   private Dimension screenDimensions;
+   private Dimension screenDimension;
    
    private ArrayList<Layer> layers = new ArrayList<>();
 }

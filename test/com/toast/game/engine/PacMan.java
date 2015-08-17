@@ -3,7 +3,6 @@ package com.toast.game.engine;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Point;
-import java.awt.image.BufferedImage;
 
 import javax.swing.JFrame;
 

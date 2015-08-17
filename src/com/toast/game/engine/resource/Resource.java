@@ -398,7 +398,7 @@ public abstract class Resource implements Serializable
    
    private static String getDefaultResourcePath()
    {
-      String pathString = ResourceExperiments.class.getResource("/").getPath();
+      String pathString = Resource.class.getResource("/").getPath();
       
       pathString = pathString.replace("%20", " ");
       

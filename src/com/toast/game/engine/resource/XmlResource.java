@@ -3,12 +3,8 @@ package com.toast.game.engine.resource;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.imageio.ImageIO;
 
 import com.toast.xml.XmlDocument;
 import com.toast.xml.exception.XmlParseException;

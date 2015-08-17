@@ -103,7 +103,7 @@ public class KeyMap extends Property implements MessageHandler
          
          XmlNode keyNode = propertyNode.appendChild("key");
          keyNode.setAttribute("keyId", pair.getKey());
-         keyNode.setValue(pair.getValue());
+         keyNode.setAttribute("messageId", pair.getValue());
       }
       
       return (propertyNode);
@@ -160,7 +160,7 @@ public class KeyMap extends Property implements MessageHandler
          }
          else
          {
-            mapKey(keyNode.getAttribute("keyId").getIntValue(), keyNode.getValue());
+            mapKey(keyNode.getAttribute("keyId").getIntValue(), keyNode.getAttribute("messageId").getValue());
          }
       }
    }

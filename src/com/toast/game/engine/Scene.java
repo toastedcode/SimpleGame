@@ -1,12 +1,15 @@
 package com.toast.game.engine;
 
+import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import com.toast.game.common.LockableMap;
 import com.toast.game.engine.actor.Actor;
+import com.toast.game.engine.actor.Camera;
 import com.toast.game.engine.interfaces.Updatable;
 import com.toast.xml.Serializable;
 import com.toast.xml.XmlDocument;
@@ -48,9 +51,35 @@ public class Scene implements Updatable, Serializable
       actors.remove(id);
    }
    
+   public void setCamera(Camera camera)
+   {
+      this.camera = camera;
+   }
+   
    public void draw(Renderer renderer)
    {
-      drawList.build(actors.values(), new Rectangle(0, 0, 800, 600));
+      Rectangle clipRectangle = new Rectangle();
+      if (camera != null)
+      {
+         clipRectangle = camera.getBounds().getBounds();
+      }
+      else
+      {
+         Dimension screenDimension = renderer.getScreenDimension();
+         clipRectangle = 
+               new Rectangle(0, 0, (int)screenDimension.getWidth(), (int)screenDimension.getHeight());
+      }
+      
+      drawList.build(actors.values(), clipRectangle);
+      
+      if (camera != null)
+      {
+         renderer.setViewport(new Rectangle((int)camera.getPosition().getX(), 
+                                            (int)camera.getPosition().getY(),
+                                            camera.getWidth(),
+                                            camera.getHeight()));
+      }
+      
       drawList.draw(renderer);
    }
    
@@ -155,14 +184,12 @@ public class Scene implements Updatable, Serializable
          // actors
          //
          
-         XmlNodeList actorNodes = node.getChildren("actor");
+         XmlNodeList actorNodes = node.getChildren();
          
          for (XmlNode actorNode : actorNodes)
          {
-            Actor actor = new Actor(actorNode.getAttribute("id").getValue());
-            actor.deserialize(actorNode);
-            
-            // TODO: This does not register the actor for messaging.
+            Actor actor = Actor.createActor(actorNode);
+
             add(actor);
          }
       }
@@ -176,6 +203,8 @@ public class Scene implements Updatable, Serializable
    private String id;
    
    LockableMap<String, Actor> actors = new LockableMap<>();
+   
+   Camera camera;
    
    DrawList drawList = new DrawList();
 }

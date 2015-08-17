@@ -81,8 +81,6 @@ public class AnimationMap
    
    public AnimationMap(XmlResource resource)
    {
-      this.resource = resource;
-      
       XmlDocument document = resource.getDocument();
       
       loadFrames(document);
@@ -239,8 +237,6 @@ public class AnimationMap
               (frameIndex >= 0) &&
               (frameIndex < frames.size()));
    }
-   
-   private XmlResource resource;
    
    private List<Frame> frames = new ArrayList<>();
    

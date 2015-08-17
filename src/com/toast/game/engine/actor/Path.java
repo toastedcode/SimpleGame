@@ -3,7 +3,6 @@ package com.toast.game.engine.actor;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -97,7 +96,8 @@ public class Path extends Actor implements Drawable
          maxY = Math.max(maxY,  waypoint.getY());
       }
       
-      setBounds(new Rectangle2D.Double(minX, minY, (maxX - minX), (maxY - minY)));
+      setPosition(minX, minY);
+      setDimension((int)(maxX - minX), (int)(maxY - minY));
    }
 
    private List<Point> waypoints;

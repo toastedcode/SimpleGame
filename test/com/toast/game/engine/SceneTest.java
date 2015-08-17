@@ -4,8 +4,6 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.junit.Test;
 
