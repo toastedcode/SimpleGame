@@ -66,6 +66,8 @@ public class Animation extends Property implements Updatable, Drawable
       this.animationMap = animationMap;
       this.animationId = animationId;
       this.frameRate = frameRate;
+      flipHorizontal = false;
+      flipVertical = false;
       elapsedAnimationTime = 0;
       currentFrame = 0;
       animationDirection = AnimationDirection.FORWARD;
@@ -87,6 +89,8 @@ public class Animation extends Property implements Updatable, Drawable
       animationMap = new AnimationMap(xmlResource);
       this.animationId = animationId;
       this.frameRate = frameRate;
+      flipHorizontal = false;
+      flipVertical = false;
       elapsedAnimationTime = 0;
       currentFrame = 0;
       animationDirection = AnimationDirection.FORWARD;
@@ -192,13 +196,20 @@ public class Animation extends Property implements Updatable, Drawable
    
    public int getWidth()
    {
-      return (bufferedImage.getWidth());
+      // Retrieve the current frame.
+      AnimationMap.Frame frame = animationMap.getFrame(animationId,  currentFrame);
+
+      return ((int)frame.getDimension().getWidth());
    }
    
    
    public int getHeight()
    {
-      return (bufferedImage.getHeight());
+      // Retrieve the current frame.
+      AnimationMap.Frame frame = animationMap.getFrame(animationId,  currentFrame);
+
+      return ((int)frame.getDimension().getHeight());
+
    }      
    
    public void draw(Graphics graphics)
@@ -207,6 +218,16 @@ public class Animation extends Property implements Updatable, Drawable
       {
          Point position = new Point(0, 0);
          double scale = 1.0;
+         
+         if (flipHorizontal)
+         {
+            // TODO
+         }
+         
+         if (flipVertical)
+         {
+            // TODO
+         }
          
          // Retrieve the current frame.
          AnimationMap.Frame frame = animationMap.getFrame(animationId,  currentFrame);
@@ -476,6 +497,18 @@ public class Animation extends Property implements Updatable, Drawable
       {
          isVisible = node.getChild("isVisible").getBoolValue();
       }  
+      
+      // flipHorizontal
+      if (node.hasAttribute("flipHorizontal"))
+      {
+         flipHorizontal = node.getAttribute("flipHorizontal").getBoolValue();
+      }
+      
+      // flipVertical
+      if (node.hasAttribute("flipVertical"))
+      {
+         flipVertical = node.getAttribute("flipVertical").getBoolValue();
+      }
    }
    
    // **************************************************************************
@@ -497,6 +530,12 @@ public class Animation extends Property implements Updatable, Drawable
    
    // The speed (frames per second) at which the Animation should be played.
    private int frameRate;
+   
+   // TODO: Make use of this.
+   private boolean flipHorizontal = false;
+   
+   // TODO: Make use of this.
+   private boolean flipVertical = false;
    
    // A value holding the elapsed time since the last animation frame update.
    private long elapsedAnimationTime;

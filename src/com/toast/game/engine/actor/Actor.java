@@ -1,6 +1,12 @@
 package com.toast.game.engine.actor;
 
+import com.toast.game.common.CoordinatesType;
+import com.toast.game.common.Vector2D;
 import com.toast.game.engine.Renderer;
+import com.toast.game.engine.collision.Collidable;
+import com.toast.game.engine.collision.Collision;
+import com.toast.game.engine.collision.CollisionHandler;
+import com.toast.game.engine.collision.CollisionManager;
 import com.toast.game.engine.interfaces.Drawable;
 import com.toast.game.engine.interfaces.Mailable;
 import com.toast.game.engine.interfaces.Movable;
@@ -8,7 +14,9 @@ import com.toast.game.engine.interfaces.Updatable;
 import com.toast.game.engine.message.Message;
 import com.toast.game.engine.message.MessageHandler;
 import com.toast.game.engine.message.Messenger;
+import com.toast.game.engine.property.CollisionShape;
 import com.toast.game.engine.property.Mailbox;
+import com.toast.game.engine.property.Physics;
 import com.toast.game.engine.property.Property;
 import com.toast.game.engine.property.State;
 import com.toast.xml.Serializable;
@@ -18,6 +26,7 @@ import com.toast.xml.XmlUtils;
 import com.toast.xml.exception.XmlFormatException;
 
 import java.awt.Dimension;
+import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -27,7 +36,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Actor implements Updatable, Movable, Mailable, Serializable
+public class Actor implements Updatable, Movable, Mailable, Serializable, Collidable
 {
    public static Actor createActor(XmlNode node)
    {
@@ -37,6 +46,7 @@ public class Actor implements Updatable, Movable, Mailable, Serializable
       {
          registerActorClass("actor", Actor.class);
          registerActorClass("character", Character.class);
+         registerActorClass("camera", Camera.class);
       }
       
       String className = node.getName();
@@ -98,6 +108,11 @@ public class Actor implements Updatable, Movable, Mailable, Serializable
       return (id);
    }
    
+   public void initialize()
+   {
+      // Nothing to do here.
+   }
+   
    public void draw(Renderer renderer)
    {
       AffineTransform transform = getTransform();
@@ -107,7 +122,7 @@ public class Actor implements Updatable, Movable, Mailable, Serializable
          // TODO: Make this more OO, please!
          if (property instanceof Drawable)
          {
-            renderer.draw((Drawable)property, transform, getLayer());
+            renderer.draw((Drawable)property, transform, getLayer(), getCoordinatesType());
          }
       }
    }
@@ -147,6 +162,16 @@ public class Actor implements Updatable, Movable, Mailable, Serializable
    public void setZOrder(int zOrder)
    {
       this.zOrder = zOrder;
+   }
+   
+   public CoordinatesType getCoordinatesType()
+   {
+      return (coordinatesType);
+   }
+   
+   public void setCoordinatesType(CoordinatesType coordinatesType)
+   {
+      this.coordinatesType = coordinatesType;
    }
    
    public Dimension getDimension()
@@ -225,6 +250,18 @@ public class Actor implements Updatable, Movable, Mailable, Serializable
       }
       
       // TODO: Make this more OO, please!
+      if (property instanceof Physics)
+      {
+         addPhysics((Physics)physics);
+      }
+      
+      // TODO: Make this more OO, please!
+      if (property instanceof Collidable)
+      {
+         addCollidable((Collidable)property);
+      }
+      
+      // TODO: Make this more OO, please!
       if (property instanceof Mailbox)
       {
          addMailbox((Mailbox)property);
@@ -286,9 +323,13 @@ public class Actor implements Updatable, Movable, Mailable, Serializable
       return (value);
    }
    
+   public Physics getPhysics()
+   {
+      return (physics);
+   }
+   
    // **************************************************************************
    //                           Updatable interface
-   // **************************************************************************
    
    @Override
    public void update(long elapsedTime)
@@ -308,7 +349,6 @@ public class Actor implements Updatable, Movable, Mailable, Serializable
    
    // **************************************************************************
    //                             Movable interface
-   // **************************************************************************
 
    @Override
    public void moveBy(double deltaX, double deltaY)
@@ -324,7 +364,6 @@ public class Actor implements Updatable, Movable, Mailable, Serializable
    
    // **************************************************************************
    //                             Mailable interface
-   // **************************************************************************
 
    @Override
    public String getAddress()
@@ -345,6 +384,50 @@ public class Actor implements Updatable, Movable, Mailable, Serializable
                     String.format("Actor [%s] is not configured to handle message [%s].", 
                                   getId(), 
                                   message.getMessageId()));
+      }
+   }
+   
+   // **************************************************************************
+   //                         Collidable interface
+
+   @Override
+   public boolean isCollisionEnabled()
+   {
+      return ((collisionShape != null) && isCollisionEnabled);
+   }
+
+   @Override
+   public Shape getCollisionShape()
+   {
+      return (collisionShape.getShape());
+   }
+
+   @Override
+   public Vector2D getCollisionVector()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+   
+   public void onCollision(Collision collision)
+   {
+      for (Property property : properties.values())
+      {
+         if (property instanceof CollisionHandler)
+         {
+            ((CollisionHandler)property).onCollision(collision);
+         }
+      }
+   }
+   
+   public void onSeparation(Collidable collided)
+   {
+      for (Property property : properties.values())
+      {
+         if (property instanceof CollisionHandler)
+         {
+            ((CollisionHandler)property).onSeparation(collided);
+         }
       }
    }
    
@@ -388,6 +471,12 @@ public class Actor implements Updatable, Movable, Mailable, Serializable
       // zOrder
       actorNode.appendChild("zOrder").setValue(Integer.toString(zOrder));
       
+      // coordinatesType
+      if (coordinatesType != CoordinatesType.WORLD)
+      {
+         actorNode.appendChild("coordinatesType").setValue(coordinatesType);
+      }
+      
       // properties
       childNode = actorNode.appendChild("properties");
       for (Property property : properties.values())
@@ -411,6 +500,16 @@ public class Actor implements Updatable, Movable, Mailable, Serializable
       transform.scale(getScale().getWidth(), getScale().getHeight());
       
       return (transform);
+   }
+   
+   private void addPhysics(Physics physics)
+   {
+      this.physics = physics;
+   }
+   
+   private void addCollidable(Collidable collidable)
+   {
+      CollisionManager.register(collidable);
    }
    
    private void addMailbox(Mailbox mailbox)
@@ -451,6 +550,12 @@ public class Actor implements Updatable, Movable, Mailable, Serializable
       // zOrder
       zOrder = XmlUtils.getInt(node, "isEnabled", 0);
       
+      // coordinatesType
+      if (node.hasChild("coordinatesType"))
+      {
+         coordinatesType = CoordinatesType.valueOf(node.getChild("coordinatesType").getValue());
+      }
+      
       // properties
       if (node.hasChild("properties"))
       {
@@ -479,11 +584,19 @@ public class Actor implements Updatable, Movable, Mailable, Serializable
    
    private int zOrder = 0;
    
+   private CoordinatesType coordinatesType = CoordinatesType.WORLD;
+   
    private Dimension dimension = new Dimension(0, 0);
    
    private Map<String, Property> properties = new HashMap<>();
    
    private Mailbox mailbox = null;
+   
+   private Physics physics = null;
+   
+   private boolean isCollisionEnabled = true;
+   
+   private CollisionShape collisionShape = null;
    
    private static Map<String, Class<?>> actorClasses = new HashMap<>();
 }

@@ -2,12 +2,12 @@ package com.toast.game.engine;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import com.toast.game.common.LockableMap;
+import com.toast.game.common.XmlUtils;
 import com.toast.game.engine.actor.Actor;
 import com.toast.game.engine.actor.Camera;
 import com.toast.game.engine.interfaces.Updatable;
@@ -21,14 +21,39 @@ import com.toast.xml.exception.XmlSerializeException;
 
 public class Scene implements Updatable, Serializable
 {
+   // **************************************************************************
+   //                                  Public
+   // **************************************************************************
+   
    public Scene(String id)
    {
       this.id = id;
+      dimension = new Dimension();
    }
    
    public String getId()
    {
       return (id);
+   }
+   
+   public Dimension getDimension()
+   {
+      return ((Dimension)dimension.clone());
+   }
+   
+   public int getWidth()
+   {
+      return ((int)dimension.getWidth());
+   }
+   
+   public int getHeight()
+   {
+      return ((int)dimension.getHeight());
+   }
+   
+   public void setDimension(Dimension dimension)
+   {
+      this.dimension.setSize(dimension.getWidth(), dimension.getHeight());
    }
    
    public Actor getActor(String id)
@@ -56,6 +81,16 @@ public class Scene implements Updatable, Serializable
       this.camera = camera;
    }
    
+   public void initialize()
+   {
+      if (cameraId != null)
+      {
+         camera = (Camera)actors.get(cameraId);
+      }
+      
+      initializeActors();
+   }
+   
    public void draw(Renderer renderer)
    {
       Rectangle clipRectangle = new Rectangle();
@@ -78,6 +113,7 @@ public class Scene implements Updatable, Serializable
                                             (int)camera.getPosition().getY(),
                                             camera.getWidth(),
                                             camera.getHeight()));
+         
       }
       
       drawList.draw(renderer);
@@ -163,10 +199,22 @@ public class Scene implements Updatable, Serializable
       // id
       sceneNode.setAttribute("id", getId());
       
+      // dimension
+      XmlNode childNode = sceneNode.appendChild("dimension");
+      childNode.setAttribute("width",  getWidth());
+      childNode.setAttribute("height",  getHeight());
+      
+      // camera
+      if (camera != null)
+      {
+         sceneNode.appendChild("camera").setAttribute("id",  camera.getId());
+      }
+      
       // actors
+      childNode = sceneNode.appendChild("actors");
       for (Actor actor : actors.values())
       {
-         actor.serialize(sceneNode);
+         actor.serialize(childNode);
       }
       
       return (sceneNode);
@@ -180,17 +228,29 @@ public class Scene implements Updatable, Serializable
          // id
          id = node.getAttribute("id").getValue();
          
+         // dimension
+         setDimension(XmlUtils.getDimension(node.getChild("dimension")));
+         
+         // camera
+         if (node.hasChild("camera"))
+         {
+            cameraId = node.getChild("camera").getAttribute("id").getValue();
+         }
+         
          //
          // actors
          //
          
-         XmlNodeList actorNodes = node.getChildren();
-         
-         for (XmlNode actorNode : actorNodes)
+         if (node.hasChild("actors"))
          {
-            Actor actor = Actor.createActor(actorNode);
-
-            add(actor);
+            XmlNodeList actorNodes = node.getChild("actors").getChildren();
+            
+            for (XmlNode actorNode : actorNodes)
+            {
+               Actor actor = Actor.createActor(actorNode);
+   
+               add(actor);
+            }
          }
       }
       catch (XmlFormatException e)
@@ -200,9 +260,25 @@ public class Scene implements Updatable, Serializable
       }
    }
    
+   // **************************************************************************
+   //                                  Private
+   // **************************************************************************
+   
+   private void initializeActors()
+   {
+      for (Actor actor : actors.values())
+      {
+         actor.initialize();
+      }
+   }
+   
    private String id;
    
+   Dimension dimension;
+   
    LockableMap<String, Actor> actors = new LockableMap<>();
+   
+   String cameraId;
    
    Camera camera;
    

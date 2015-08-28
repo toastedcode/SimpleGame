@@ -8,7 +8,6 @@ import javax.swing.JFrame;
 
 import com.toast.game.engine.Game;
 import com.toast.game.engine.Scene;
-import com.toast.game.engine.actor.Camera;
 import com.toast.game.engine.resource.Resource;
 import com.toast.game.engine.resource.ResourceCreationException;
 import com.toast.xml.exception.XmlFormatException;
@@ -45,13 +44,6 @@ public class Game_01
       {
          e.printStackTrace();
       }
-      
-      Camera camera = new Camera("testCam");
-      camera.setPosition(0, 0);
-      camera.setDimension(1200, 445);
-      levelOne.add(camera);
-      //levelOne.setCamera(camera);
-      camera.follow(levelOne.getActor("player"), 80);
       
       Game.setCurrentScene(levelOne);
       

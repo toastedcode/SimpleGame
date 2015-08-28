@@ -12,6 +12,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.toast.game.engine.actor.Actor;
+import com.toast.game.engine.collision.Collidable;
+import com.toast.game.engine.collision.Collision;
+import com.toast.game.engine.collision.CollisionHandler;
 import com.toast.game.engine.interfaces.Drawable;
 import com.toast.game.engine.interfaces.Updatable;
 import com.toast.game.engine.message.Message;
@@ -20,7 +24,7 @@ import com.toast.game.engine.resource.ScriptResource;
 import com.toast.xml.XmlNode;
 import com.toast.xml.exception.XmlFormatException;
 
-public class Script extends Property implements Drawable, Updatable, MessageHandler
+public class Script extends Property implements Drawable, Updatable, MessageHandler, CollisionHandler
 {
    // **************************************************************************
    //                             Enumerations
@@ -32,7 +36,9 @@ public class Script extends Property implements Drawable, Updatable, MessageHand
       UPDATE("update"),
       HANDLE_MESSAGE("handleMessage"),
       DESTROY("destroy"),
-      DRAW("draw");
+      DRAW("draw"),
+      ON_COLLISION("onCollision"),
+      ON_SEPARATION("onSeparation");
       
       private Function(String callString)
       {
@@ -265,6 +271,24 @@ public class Script extends Property implements Drawable, Updatable, MessageHand
                new Script.Variable("actor", getParent()), 
                new Script.Variable("message", message));
       }
+   }
+   
+   // **************************************************************************
+   //                       CollisionHandler interface
+   
+   @Override
+   public void onCollision(Collision collision)
+   {
+      evaluate(Script.Function.ON_COLLISION, 
+               new Script.Variable("actor", getParent()),
+               new Script.Variable("collision", collision));
+   }
+   
+   @Override
+   public void onSeparation(Collidable collided)
+   {
+      evaluate(Script.Function.ON_SEPARATION, 
+               new Script.Variable("collided", (Actor)collided));
    }
    
    // **************************************************************************

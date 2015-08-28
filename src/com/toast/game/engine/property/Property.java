@@ -26,6 +26,7 @@ public class Property implements Serializable
          registerPropertyClass("mailbox", Mailbox.class);
          registerPropertyClass("script", Script.class);
          registerPropertyClass("keyMap", KeyMap.class);
+         registerPropertyClass("text", Text.class);
       }
       
       String propertyName = node.getName();

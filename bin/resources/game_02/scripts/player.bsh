@@ -1,0 +1,78 @@
+import com.toast.game.engine.*;
+
+// **************************************************************************
+//                            Public Operations
+// **************************************************************************
+
+public void handleMessage()
+{
+   com.toast.game.engine.actor.Character character = (com.toast.game.engine.actor.Character)actor;
+
+   switch (message.getMessageId())
+   {
+      case "msgLEFT":
+      {
+         boolean isPressed = Boolean.valueOf(message.getPayload("isKeyPressed"));
+         
+         if (isPressed == true)
+         {
+            character.setState("walk_left");
+         }
+         else
+         {
+            character.setState("idle_left");
+         }
+         break;
+      }
+      
+      case "msgRIGHT":
+      {
+         boolean isPressed = Boolean.valueOf(message.getPayload("isKeyPressed"));
+         
+         if (isPressed == true)
+         {
+            character.setState("walk_right");
+         }
+         else
+         {
+            character.setState("idle_right");
+         }
+         break;
+      }
+      
+      case "msgUP":
+      {
+         boolean isPressed = Boolean.valueOf(message.getPayload("isKeyPressed"));
+         
+         if (isPressed == true)
+         {
+            character.setState("walk_up");
+         }
+         else
+         {
+            character.setState("idle_up");
+         }
+         break;
+      }
+      
+      case "msgDOWN":
+      {
+         boolean isPressed = Boolean.valueOf(message.getPayload("isKeyPressed"));
+         
+         if (isPressed == true)
+         {
+            character.setState("walk_down");
+         }
+         else
+         {
+            character.setState("idle_down");
+         }
+         break;
+      }
+
+      default:
+      {
+         break;
+      }
+   }
+}

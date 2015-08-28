@@ -1,13 +1,26 @@
 package com.toast.game.engine.property;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.toast.game.common.Vector2D;
 import com.toast.game.common.XmlUtils;
+import com.toast.game.engine.actor.Actor;
+import com.toast.game.engine.collision.Collidable;
+import com.toast.game.engine.collision.Collision;
+import com.toast.game.engine.collision.CollisionHandler;
 import com.toast.game.engine.interfaces.Updatable;
 import com.toast.xml.XmlNode;
 import com.toast.xml.exception.XmlFormatException;
 
-public class Physics extends Property implements Updatable
+public class Physics extends Property implements Updatable, CollisionHandler
 {
+   // **************************************************************************
+   //                                Public
+   // **************************************************************************
+   
    public Physics(String id)
    {
       super(id);
@@ -30,6 +43,7 @@ public class Physics extends Property implements Updatable
       clone.drag = drag;
       clone.friction = friction;
       clone.elasticity = elasticity;
+      clone.viscosity = viscosity;
       
       return (clone);
    }
@@ -113,7 +127,41 @@ public class Physics extends Property implements Updatable
    {
       this.elasticity = elasticity;
    }
+   
+   public double getViscosity()
+   {
+      return (viscosity);
+   }
 
+   public void setViscosity(double viscosity)
+   {
+      this.viscosity = viscosity;
+   }
+   
+   public boolean isCollided(Actor actor)
+   {
+      return (collisions.containsKey(actor.getId()));
+   }
+   
+   // **************************************************************************
+   //                        CollisionManager interface
+   
+   @Override
+   public void onCollision(Collision collision)
+   {
+      Actor actor = getParent();
+      Actor collidedActor = (Actor)collision.getOther(actor);
+   }
+   
+   @Override
+   public void onSeparation(Collidable collided)
+   {
+      Actor collidedActor = (Actor)collided;
+   }
+
+   // **************************************************************************
+   //                           Updatable interface
+   
    @Override
    public void update(long elapsedTime)
    {
@@ -128,7 +176,18 @@ public class Physics extends Property implements Updatable
       velocity.y += acceleration.y * elapsedSeconds;
       
       // Apply drag.
-      velocity.x += velocity.x * -1.0 * (drag * elapsedSeconds);  
+      velocity.x += velocity.x * -1.0 * (drag * elapsedSeconds);
+      
+      // Apply viscosity
+      for (Map.Entry<Actor, Collision> entry : collisions.entrySet())
+      {
+         Physics physics = entry.getKey().getPhysics();
+         
+         if ((physics != null) && (physics.isEnabled()))
+         {
+            Vector2D.multiply(velocity,  (physics.getElasticity() * -1));
+         }
+      }
       
       // Determine the translation.
       double deltaX = velocity.x * elapsedSeconds;
@@ -188,7 +247,9 @@ public class Physics extends Property implements Updatable
       
       // elasticity
       propertyNode.appendChild("elasticity", elasticity);
-
+      
+      // elasticity
+      propertyNode.appendChild("viscosity", viscosity);
 
       return (propertyNode);
    }
@@ -214,13 +275,16 @@ public class Physics extends Property implements Updatable
       gravity = XmlUtils.getVector(node.getChild("gravity"));
       
       // drag
-      drag = node.getChild("drag").getIntValue();
+      drag = node.getChild("drag").getDoubleValue();
       
       // friction
-      friction = node.getChild("friction").getIntValue();
+      friction = node.getChild("friction").getDoubleValue();
       
       // elasticity
-      elasticity = node.getChild("elasticity").getIntValue();
+      elasticity = node.getChild("elasticity").getDoubleValue();
+      
+      // viscosity
+      viscosity = node.getChild("viscosity").getDoubleValue();
    }
    
    // **************************************************************************
@@ -244,4 +308,8 @@ public class Physics extends Property implements Updatable
    private double friction;
    
    private double elasticity;
+   
+   private double viscosity;
+   
+   private Map<Actor, Collision> collisions = new HashMap<>();
 }

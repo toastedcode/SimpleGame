@@ -1,18 +1,15 @@
 package com.toast.game.engine.actor;
 
-import java.awt.Graphics;
-import java.awt.Point;
-import java.awt.geom.AffineTransform;
+import java.awt.Dimension;
 import java.awt.geom.Point2D;
 
 import com.toast.game.common.Vector2D;
-import com.toast.game.engine.Renderer;
-import com.toast.game.engine.interfaces.Drawable;
-import com.toast.game.engine.property.Property;
+import com.toast.game.common.XmlUtils;
+import com.toast.game.engine.Game;
 import com.toast.xml.XmlNode;
 import com.toast.xml.exception.XmlFormatException;
 
-public class Camera extends Actor implements Drawable
+public class Camera extends Actor
 {
    // **************************************************************************
    //                                Public
@@ -44,6 +41,15 @@ public class Camera extends Actor implements Drawable
       
    // **************************************************************************
    //                            Actor overrides
+   
+   @Override
+   public void initialize()
+   {
+      if (followActorId != null)
+      {
+         followActor = Game.getActor(followActorId);
+      }
+   }
   
    @Override
    public void update(long elapsedTime)
@@ -51,15 +57,6 @@ public class Camera extends Actor implements Drawable
       super.update(elapsedTime);
       
       followActor(elapsedTime);
-   }
-   
-   public void draw(Renderer renderer)
-   {
-      super.draw(renderer);
-      
-      AffineTransform transform = getTransform();
-      
-      renderer.draw(this, transform,  getLayer());
    }
   
    // **************************************************************************
@@ -69,6 +66,7 @@ public class Camera extends Actor implements Drawable
    <camera id="">
       <position x="" y=""/>
       <dimension width="" height=""/>
+      <followActor id="" isFollowing="" followSpeed=""/>
    </camera>
    */
    
@@ -81,6 +79,20 @@ public class Camera extends Actor implements Drawable
    public XmlNode serialize(XmlNode node)
    {
       XmlNode actorNode = super.serialize(node);
+      
+      // dimension
+      XmlNode childNode = actorNode.appendChild("dimension");
+      childNode.setAttribute("width", getWidth());
+      childNode.setAttribute("height", getHeight());
+      
+      // followActor, isFollowing, followSpeed
+      if (followActor != null)
+      {
+         childNode = actorNode.appendChild("followActor");
+         childNode.setAttribute("id", followActor.getId());
+         childNode.setAttribute("isFollowing", isFollowing);
+         childNode.setAttribute("followSpeed", followSpeed);
+      }
 
       return (actorNode);
    }
@@ -134,34 +146,45 @@ public class Camera extends Actor implements Drawable
             }
          }
          
-         // TODO: Restrict to world coordinates.
-         
+         // Center on the followed actor.
          setCenter(newCenter);
+         
+         // Restrict to scene dimension.
+         Dimension sceneDimension = Game.getCurrentScene().getDimension();
+         Point2D.Double adjustedPosition = getPosition();
+         adjustedPosition.setLocation(Math.max(adjustedPosition.getX(), 0),
+                                      Math.max(adjustedPosition.getY(), 0));
+         adjustedPosition.setLocation(Math.min(adjustedPosition.getX(), (sceneDimension.getWidth() - getWidth())),
+                                      Math.min(adjustedPosition.getY(), (sceneDimension.getHeight() - getHeight())));
+         
+         setPosition(adjustedPosition);
       }
       
    }
    
    private void deserializeThis(XmlNode node) throws XmlFormatException
    {
+      // dimension
+      this.setDimension(XmlUtils.getDimension(node.getChild("dimension")));
       
+      // followActor, isFollowing, followSpeed
+      if (node.hasChild("followActor"))
+      {
+         XmlNode followActorNode = node.getChild("followActor");
+         
+         followActorId = followActorNode.getAttribute("id").getValue();
+         isFollowing = followActorNode.getAttribute("isFollowing").getBoolValue();
+         followSpeed = followActorNode.getAttribute("followSpeed").getIntValue();
+      }
    }
    
    private static final int MILLISECONDS_PER_SECOND = 1000;
+   
+   private String followActorId = null;
    
    private Actor followActor = null;
    
    private int followSpeed = 0;
    
    private boolean isFollowing = false;
-
-   @Override
-   public void draw(Graphics graphics)
-   {
-      graphics.setColor(java.awt.Color.WHITE);
-      graphics.drawRect((int)getPosition().x, (int)getPosition().y,  getWidth(),  getHeight());// TODO Auto-generated method stub
-      
-      Point2D.Double center = getCenter();
-      Point2D.Double actorCenter = followActor.getCenter();
-      graphics.drawLine((int)center.x,  (int)center.y,  (int)actorCenter.x,  (int)actorCenter.y);
-   }
 }

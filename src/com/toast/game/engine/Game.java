@@ -43,6 +43,7 @@ public class Game
    public static void setCurrentScene(Scene scene)
    {
       currentScene = scene;
+      currentScene.initialize();
    }
    
    public static void remove(Scene scene)

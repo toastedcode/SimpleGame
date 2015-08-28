@@ -6,13 +6,12 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D;
 import java.awt.Dimension;
 import java.awt.image.ImageObserver;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-import com.toast.game.engine.actor.Camera;
+import com.toast.game.common.CoordinatesType;
 import com.toast.game.engine.interfaces.Drawable;
 
 public class Renderer
@@ -117,7 +116,8 @@ public class Renderer
    public void draw(
       Drawable drawable,
       AffineTransform transform,
-      int layerIndex)
+      int layerIndex,
+      CoordinatesType coordinatesType)
    {
       if ((layerIndex >= 0) &&
           (layerIndex < layers.size()))
@@ -128,7 +128,8 @@ public class Renderer
          layer.getGraphics().setTransform(IDENTITY_TRANSFORM);
              
          // Viewport transform
-         if (viewport != null)
+         if ((coordinatesType == CoordinatesType.WORLD) &&
+             (viewport != null))
          {
             AffineTransform viewportTransform = new AffineTransform();
             viewportTransform.translate(-viewport.getX(), -viewport.getY());

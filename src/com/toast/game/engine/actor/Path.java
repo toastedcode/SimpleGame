@@ -43,7 +43,7 @@ public class Path extends Actor implements Drawable
    @Override
    public void draw(Renderer renderer)
    {
-      renderer.draw(this, getTransform(), getLayer());
+      renderer.draw(this, getTransform(), getLayer(), getCoordinatesType());
    }
 
    @Override

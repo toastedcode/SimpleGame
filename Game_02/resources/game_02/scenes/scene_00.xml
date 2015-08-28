@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scene id="scene_00">
+   <dimension width="2560" height="720"/>
+   <camera id="camera"/>
+   <actors>
+      <camera id="camera">
+          <dimension width="1280" height="720"/>
+          <followActor id="player" isFollowing="true" followSpeed="0"/>
+      </camera>
+	   <actor id="background_00">
+	      <properties>
+	         <text id="title">robin</text>
+	         <!-- image id="imgBackground" resource="background.png"/-->
+	      </properties>
+	   </actor>
+	   <actor id="background_01">
+	      <position x="1280" y="0"/>
+         <properties>
+            <image id="imgBackground" resource="background.png"/>
+         </properties>
+      </actor>
+	   <character id="player">
+	      <position x="0" y="0"/>
+	      <properties>
+	         <script id="playerScript" resource="player.bsh"/>
+	         <script id="saveGameScript" resource="saveGame.bsh"/>
+	         <mailbox id="mailbox">
+	            <message id="msgKEY_PRESSED"/>
+	            <message id="msgKEY_RELEASED"/>
+	         </mailbox>
+	         <animationGroup id="characterAnimations">
+	            <currentAnimation id="idle_right" direction="FORWARD" type="LOOP"/>
+	            <!--  Idle animations -->
+	            <animation id="idle_right" imageResource="robin_right.png" animationResource="robin.anim" frameRate="100"/>
+	            <animation id="idle_left" imageResource="robin_left.png" animationResource="robin.anim"  frameRate="100"/>
+	            <!--  Walk animations -->
+		         <animation id="walk_right" imageResource="robin_right.png" animationResource="robin.anim"  frameRate="100"/>
+		         <animation id="walk_left" imageResource="robin_left.png" animationResource="robin.anim"  frameRate="100"/>
+	         </animationGroup>
+	         <keyMap id="keyMap">
+	            <key keyChar="s" messageId="msgSAVE"/>
+	            <key keyChar="l" messageId="msgLOAD"/>
+	            <key keyId="37" messageId="msgLEFT"/>
+	            <key keyId="39" messageId="msgRIGHT"/>
+	            <key keyId="38" messageId="msgUP"/>
+	            <key keyId="40" messageId="msgDOWN"/>
+	         </keyMap>
+	         <motor id="motor">
+	            <keyMap>
+	               <key keyId="37">LEFT</key>
+	               <key keyId="39">RIGHT</key>
+	               <key keyId="38">UP</key>
+	               <key keyId="40">DOWN</key>
+	            </keyMap>
+	         </motor>
+	      </properties>
+	      <states>
+	         <state id="walk_right"/>
+	         <state id="walk_left"/>
+	         <state id="idle_left"/>
+	         <state id="idle_right"/>
+	      </states>
+	      <state>idle_right</state>
+	   </character>
+	</actors>
+</scene>
