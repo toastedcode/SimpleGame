@@ -51,29 +51,26 @@ public class Image extends Property implements Drawable
    @Override
    public void draw(Graphics graphics)
    {
-      if (isVisible() == true)
-      {
-         Point position = new Point(0, 0);
-         double scale = 1.0;
-         
-         Rectangle sourceRectangle = new Rectangle(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight());
-         
-         Rectangle destinationRectangle = new Rectangle(position,
-                                                        new Dimension((int)(bufferedImage.getWidth() * scale), 
-                                                                      (int)(bufferedImage.getHeight() * scale)));
-         
-         ((Graphics2D)graphics).drawImage(
-            bufferedImage, 
-            destinationRectangle.x, 
-            destinationRectangle.y, 
-            (destinationRectangle.x + destinationRectangle.width), 
-            (destinationRectangle.y + destinationRectangle.height), 
-            sourceRectangle.x, 
-            sourceRectangle.y, 
-            (sourceRectangle.x+ sourceRectangle.width), 
-            (sourceRectangle.y + sourceRectangle.height), 
-            null);
-      }
+      Point position = new Point(0, 0);
+      double scale = 1.0;
+      
+      Rectangle sourceRectangle = new Rectangle(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight());
+      
+      Rectangle destinationRectangle = new Rectangle(position,
+                                                     new Dimension((int)(bufferedImage.getWidth() * scale), 
+                                                                   (int)(bufferedImage.getHeight() * scale)));
+      
+      ((Graphics2D)graphics).drawImage(
+         bufferedImage, 
+         destinationRectangle.x, 
+         destinationRectangle.y, 
+         (destinationRectangle.x + destinationRectangle.width), 
+         (destinationRectangle.y + destinationRectangle.height), 
+         sourceRectangle.x, 
+         sourceRectangle.y, 
+         (sourceRectangle.x+ sourceRectangle.width), 
+         (sourceRectangle.y + sourceRectangle.height), 
+         null);
    }
    
    @Override
@@ -87,18 +84,6 @@ public class Image extends Property implements Drawable
    public int getHeight()
    {
       return (bufferedImage.getHeight());
-   }
-
-   @Override
-   public boolean isVisible()
-   {
-      return (isVisible);
-   }
-   
-   @Override
-   public void setVisible(boolean isVisible)
-   {
-      this.isVisible = isVisible;
    }
    
    // **************************************************************************
@@ -126,9 +111,6 @@ public class Image extends Property implements Drawable
       {
          propertyNode.setAttribute("resource",  resource.getId());
       }
-
-      // isVisible
-      propertyNode.appendChild("isVisible", isVisible);
       
       return (propertyNode);
    }
@@ -155,17 +137,9 @@ public class Image extends Property implements Drawable
             bufferedImage = resource.getImage();
          }
       }
-      
-      // isVisible
-      if (node.hasChild("isVisible"))
-      {
-         isVisible = node.getChild("isVisible").getBoolValue();
-      }      
    }
    
    private ImageResource resource;
       
    private BufferedImage bufferedImage;
-   
-   private boolean isVisible = true;
 }

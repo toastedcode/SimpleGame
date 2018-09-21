@@ -19,7 +19,7 @@ public class Collision extends Pair<Collidable>
       }
       else if (collidable == second())
       {
-         collidable = first();
+         other = first();
       }
       
       return (other);
@@ -29,5 +29,13 @@ public class Collision extends Pair<Collidable>
    {
       return ((collidable == first()) ||
               (collidable == second()));
+   }
+   
+   @Override
+   public boolean equals(Object collision)
+   {
+      return ((collision != null) &&
+              contains(((Collision)collision).first()) && 
+              contains(((Collision)collision).second()));
    }
 }

@@ -1,75 +1,147 @@
 import com.toast.game.engine.*;
+import java.awt.geom.Point2D;
 
 // **************************************************************************
 //                            Public Operations
 // **************************************************************************
 
+int idleBitMask  = 0;  // 0b0000;
+int rightBitMask = 8;  // 0b1000; 
+int leftBitMask  = 4;  // 0b0100;
+int upBitMask    = 2;  // 0b0010;
+int downBitMask  = 1;  // 0b0001;
+int upRightBitMask = (upBitMask & rightBitMask);
+int downRightBitMask = downBitMask & rightBitMask;
+int upLeftBitMask = upBitMask & leftBitMask;
+int downLeftBitMask = downBitMask & leftBitMask;
+
+int keyState = idleBitMask;
+
 public void handleMessage()
 {
-   com.toast.game.engine.actor.Character character = (com.toast.game.engine.actor.Character)actor;
-
    switch (message.getMessageId())
    {
       case "msgLEFT":
+      case "msgRIGHT":
+      case "msgUP":
+      case "msgDOWN":
       {
-         boolean isPressed = Boolean.valueOf(message.getPayload("isKeyPressed"));
-         
-         if (isPressed == true)
-         {
-            character.setState("walk_left");
-         }
-         else
-         {
-            character.setState("idle_left");
-         }
+         handleKeyUpdate(message.getMessageId(), Boolean.valueOf(message.getPayload("isKeyPressed")));
+         break;
+      }
+
+      default:
+      {
+         break;
+      }
+   }
+}
+
+private void handleKeyUpdate(String messageId, boolean isPressed)
+{
+   switch (messageId)
+   {
+      case "msgLEFT":
+      {
+         updateKeyState(leftBitMask, isPressed);
          break;
       }
       
       case "msgRIGHT":
       {
-         boolean isPressed = Boolean.valueOf(message.getPayload("isKeyPressed"));
-         
-         if (isPressed == true)
-         {
-            character.setState("walk_right");
-         }
-         else
-         {
-            character.setState("idle_right");
-         }
+         updateKeyState(rightBitMask, isPressed);
          break;
       }
       
       case "msgUP":
       {
-         boolean isPressed = Boolean.valueOf(message.getPayload("isKeyPressed"));
-         
-         if (isPressed == true)
-         {
-            character.setState("walk_up");
-         }
-         else
-         {
-            character.setState("idle_up");
-         }
+         updateKeyState(upBitMask, isPressed);
          break;
       }
       
       case "msgDOWN":
       {
-         boolean isPressed = Boolean.valueOf(message.getPayload("isKeyPressed"));
-         
-         if (isPressed == true)
-         {
-            character.setState("walk_down");
-         }
-         else
-         {
-            character.setState("idle_down");
-         }
+         updateKeyState(downBitMask, isPressed);
          break;
       }
 
+      default:
+      {
+         break;
+      }
+   }
+   
+   updatePlayerState();
+}
+
+private void updateKeyState(int key, boolean isPressed)
+{
+   if (isPressed == true)
+   {
+      keyState |= key;   
+   } 
+   else
+   {
+      keyState &= (~key);
+   }
+}
+
+private void updatePlayerState()
+{
+   com.toast.game.engine.actor.Character character = (com.toast.game.engine.actor.Character)actor;
+
+   switch (keyState)
+   {
+      case idleBitMask:
+      {
+         character.setState("idle_right");
+         break;
+      }
+      
+      case rightBitMask:
+      {
+         character.setState("walk_right");
+         break;
+      }
+      
+      case leftBitMask:
+      {
+         character.setState("walk_left");
+         break;
+      }
+      
+      case upBitMask:
+      {
+         character.setState("walk_up");
+         break;
+      }
+      
+      case downBitMask:
+      {
+         character.setState("walk_down");
+         break;
+      }
+      
+      case upRightBitMask:
+      {
+         break;
+      }
+      
+      case downRightBitMask:
+      {
+         break;
+      }
+      
+      case upLeftBitMask:
+      {
+         break;
+      }
+      
+      case downLeftBitMask:
+      {
+         break;
+      }
+      
       default:
       {
          break;

@@ -1,0 +1,106 @@
+import com.toast.game.engine.*;
+import com.toast.game.engine.property.Physics;
+import java.awt.geom.Point2D;
+import com.toast.game.common.Vector2D;
+
+// **************************************************************************
+//                            Public Operations
+// **************************************************************************
+
+boolean mouseState = false;
+
+public void handleMessage()
+{
+   switch (message.getMessageId())
+   {
+      case "msgMOUSE_PRESSED":
+      {
+         mouseState = true;
+         updatePlayerState(Input.getMouseWorldPosition(), mouseState);
+         break;
+      }
+      
+      case "msgMOUSE_RELEASED":
+      {
+         mouseState = false;
+         updatePlayerState(Input.getMouseWorldPosition(), mouseState);
+         break;
+      }
+      
+      case "msgMOUSE_DRAGGED":
+      {
+         updatePlayerState(Input.getMouseWorldPosition(), mouseState);
+         break;
+      }
+      
+      case "msgMOUSE_CLICKED":
+      case "msgMOUSE_MOVED":
+      default:
+      {
+         break;
+      }
+   }
+}
+
+private void updatePlayerState(
+   Point mousePosition,
+   boolean mousePressed)
+{
+   com.toast.game.engine.actor.Character character = (com.toast.game.engine.actor.Character)actor;
+   
+   String state = "";
+   
+   Point2D.Double foot = character.getFoot();
+   
+   int deltaX = (mousePosition.x - foot.x);
+   int deltaY = (mousePosition.y - foot.y);
+   
+   if (mousePressed)
+   {
+      state = "walk_";
+      
+      Physics physics = actor.getPhysics();
+      if (physics != null)
+      {
+         Vector2D velocity = new Vector2D(deltaX, deltaY);
+         velocity.normalize();
+         velocity = Vector2D.multiply(velocity, 50);
+         physics.setVelocity(velocity);
+      } 
+   }
+   else
+   {
+      state = "idle_";
+
+      Physics physics = actor.getPhysics();
+      if (physics != null)
+      {
+         physics.setVelocity(new Vector2D(0, 0));
+      }
+   }
+   
+   if (Math.abs(deltaX) > Math.abs(deltaY))
+   {
+      if (foot.x > mousePosition.x)
+      {
+         state += "left";
+      }
+      else
+      {
+         state += "right";
+      }   
+   }
+   else
+   {
+      if (foot.y > mousePosition.y)
+      {
+         state += "up";
+      }
+      else
+      {
+         state += "down";
+      }     
+   }
+
+   character.setState(state);
+}

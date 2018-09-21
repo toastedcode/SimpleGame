@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.Dimension;
@@ -111,6 +112,17 @@ public class Renderer
       Font font = new Font("Verdana", 1, 14);
       graphics.setFont(font);
       graphics.drawString(Double.toString(Timing.getFrameRate()), 0,  15);
+      
+      // TODO: Remove
+      // Draw mouse position
+      Point mousePosition = Input.getMousePosition();
+      String text = "Mouse position: " + mousePosition.x + ", " + mousePosition.y; 
+      graphics.drawString(text, 0,  30);
+      
+      // Draw mouse world position
+      mousePosition = Input.getMouseWorldPosition();
+      text = "Mouse world position: " + mousePosition.x + ", " + mousePosition.y; 
+      graphics.drawString(text, 0,  45);
    }
       
    public void draw(
@@ -131,11 +143,7 @@ public class Renderer
          if ((coordinatesType == CoordinatesType.WORLD) &&
              (viewport != null))
          {
-            AffineTransform viewportTransform = new AffineTransform();
-            viewportTransform.translate(-viewport.getX(), -viewport.getY());
-            viewportTransform.scale((viewport.getWidth() / screenDimension.getWidth()),
-                                   (viewport.getHeight() / screenDimension.getHeight()));
-            layer.getGraphics().transform(viewportTransform);
+            layer.getGraphics().transform(getScreenTransform());
          }
       
          // Object transform
@@ -144,6 +152,34 @@ public class Renderer
          // Draw
          drawable.draw(layer.getGraphics());
       }
+   }
+   
+   public AffineTransform getScreenTransform()
+   {
+      AffineTransform transform = new AffineTransform();
+      
+      if (viewport != null)
+      {
+         transform.translate(-viewport.getX(), -viewport.getY());
+         transform.scale((viewport.getWidth() / screenDimension.getWidth()),
+                         (viewport.getHeight() / screenDimension.getHeight()));
+      }
+      
+      return (transform);
+   }
+   
+   public AffineTransform getWorldTransform()
+   {
+      AffineTransform transform = new AffineTransform();
+      
+      if (viewport != null)
+      {
+         transform.translate(viewport.getX(), viewport.getY());
+         transform.scale((screenDimension.getWidth() / viewport.getWidth()),
+                         (screenDimension.getHeight() / viewport.getHeight()));
+      }
+      
+      return (transform);
    }
   
    // **************************************************************************

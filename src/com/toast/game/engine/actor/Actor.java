@@ -153,6 +153,18 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
       setPosition((center.getX() - (getWidth() / 2)),
                   (center.getY() - (getHeight() / 2)));
    }
+   
+   public Point2D.Double getFoot()
+   {
+      return (new Point2D.Double((position.getX() + (getWidth() / 2)),
+                                 (position.getY() + getHeight())));
+   }
+   
+   public void setFoot(Point2D.Double center)
+   {
+      setPosition((center.getX() - (getWidth() / 2)),
+                  (center.getY() - getHeight()));
+   }
       
    public int getZOrder()
    {
@@ -252,7 +264,7 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
       // TODO: Make this more OO, please!
       if (property instanceof Physics)
       {
-         addPhysics((Physics)physics);
+         addPhysics((Physics)property);
       }
       
       // TODO: Make this more OO, please!
@@ -272,6 +284,12 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
           (property instanceof MessageHandler))
       {
          mailbox.register((MessageHandler)property);
+      }
+      
+      if (property instanceof CollisionShape)
+      {
+         collisionShape = (CollisionShape)property;
+         CollisionManager.register(this);
       }
    }
    
@@ -336,6 +354,10 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
    {
       if (isEnabled() == true)
       {
+         // Clear delta.
+         delta.x = 0;
+         delta.y = 0;
+         
          for (Property property : properties.values())
          {
             // TODO: Make this more OO, please!
@@ -354,11 +376,19 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
    public void moveBy(double deltaX, double deltaY)
    {
       position.setLocation(position.getX() + deltaX, position.getY() + deltaY);
+      
+      // Update delta. 
+      delta.x += deltaX;
+      delta.y += deltaY;
    }
 
    @Override
    public void moveTo(double x, double y)
    {
+      // Update delta.
+      delta.x += (x - position.x);
+      delta.y += (y - position.y);
+      
       position.setLocation(x, y);
    }
    
@@ -399,7 +429,10 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
    @Override
    public Shape getCollisionShape()
    {
-      return (collisionShape.getShape());
+      AffineTransform transform = getTransform();
+      Shape transformedShape = transform.createTransformedShape(collisionShape.getShape());
+      
+      return (transformedShape);
    }
 
    @Override
@@ -411,6 +444,9 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
    
    public void onCollision(Collision collision)
    {
+      System.out.format("%s collided with %s\n", this.getId(), ((Actor)(collision.getOther(this))).getId());
+      moveBy(-delta.x, -delta.y);
+      
       for (Property property : properties.values())
       {
          if (property instanceof CollisionHandler)
@@ -422,6 +458,8 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
    
    public void onSeparation(Collidable collided)
    {
+      System.out.format("%s separated from %s\n", this.getId(), ((Actor)(collided)).getId());
+      
       for (Property property : properties.values())
       {
          if (property instanceof CollisionHandler)
@@ -581,6 +619,8 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
    private boolean isEnabled = true;
    
    private Point2D.Double position = new Point2D.Double(0, 0);
+   
+   private Vector2D delta = new Vector2D(0, 0);
    
    private int zOrder = 0;
    

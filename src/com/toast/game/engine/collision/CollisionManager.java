@@ -72,7 +72,48 @@ public class CollisionManager
       
       return (newCollisions);
    }
+
    
+   static private void updateCollisions(List<Collision> newCollisions)
+   {
+      Set<Collision> currentCollisions = getCollisionSet();
+      
+      //
+      // Separations
+      //
+      
+      for (Collision collision : currentCollisions)
+      {
+         if (!newCollisions.contains(collision))
+         {
+            removeCollision(collision);
+            
+            collision.first().onSeparation(collision.second());
+            collision.second().onSeparation(collision.first());
+         }
+      }
+      
+      //
+      // New/updated collisions
+      //
+      
+      for (Collision collision : newCollisions)
+      {
+         Collision currentCollison = getCollision(collision.first(), collision.second());
+         
+         boolean newCollision = (currentCollison == null);
+         boolean updatedCollision = ((!newCollision) && (!collision.equals(currentCollison)));
+         
+         if (newCollision || updatedCollision)
+         {
+            addCollision(collision);
+
+            collision.first().onCollision(collision);
+            collision.second().onCollision(collision);
+         }
+      }
+   }
+   /*
    static private void updateCollisions(List<Collision> newCollisions)
    {
       // Remember old collisions, temporarily.
@@ -94,10 +135,10 @@ public class CollisionManager
          
          if (newCollision || updatedCollision)
          {
+            addCollision(collision);
+
             collision.first().onCollision(collision);
             collision.second().onCollision(collision);
-            
-            addCollision(collision);
          }
       }
       
@@ -114,6 +155,7 @@ public class CollisionManager
          }
       }
    }
+   */
    
    static private List<Collision> broadPhase(List<Collidable> collidables)
    {
@@ -165,6 +207,21 @@ public class CollisionManager
       }
       
       collisions.get(collidable).put(collision.getOther(collidable), collision);
+   }
+   
+   static private void removeCollision(Collision collision)
+   {
+      removeCollision(collision.first(), collision);
+      removeCollision(collision.second(), collision);
+   }
+   
+   static private void removeCollision(Collidable collidable, Collision collision)
+   {
+      // Create a interior Map, if necessary.
+      if (collisions.get(collidable) != null)
+      {
+         collisions.get(collidable).remove(collision.getOther(collidable));
+      }
    }
    
    static private Set<Collision> getCollisionSet()

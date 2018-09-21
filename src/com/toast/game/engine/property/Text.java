@@ -3,11 +3,9 @@ package com.toast.game.engine.property;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Graphics;
 
 import com.toast.game.common.XmlUtils;
-import com.toast.game.engine.Game;
 import com.toast.game.engine.interfaces.Drawable;
 import com.toast.xml.XmlNode;
 import com.toast.xml.exception.XmlFormatException;
@@ -93,19 +91,6 @@ public class Text extends Property implements Drawable
    public int getHeight()
    {
       return ((int)dimension.getHeight());
-   }
-
-   @Override
-   public boolean isVisible()
-   {
-      return (true);
-   }
-
-   @Override
-   public void setVisible(boolean isVisible)
-   {
-      // TODO Auto-generated method stub
-      
    }
    
    // **************************************************************************

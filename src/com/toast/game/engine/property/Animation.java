@@ -214,56 +214,40 @@ public class Animation extends Property implements Updatable, Drawable
    
    public void draw(Graphics graphics)
    {
-      if (isVisible() == true)
+      Point position = new Point(0, 0);
+      double scale = 1.0;
+      
+      if (flipHorizontal)
       {
-         Point position = new Point(0, 0);
-         double scale = 1.0;
-         
-         if (flipHorizontal)
-         {
-            // TODO
-         }
-         
-         if (flipVertical)
-         {
-            // TODO
-         }
-         
-         // Retrieve the current frame.
-         AnimationMap.Frame frame = animationMap.getFrame(animationId,  currentFrame);
-         
-         Rectangle sourceRectangle = new Rectangle(frame.getPosition(), frame.getDimension());
-         
-         Rectangle destinationRectangle = new Rectangle(position,
-                                                        new Dimension((int)(frame.getDimension().getWidth() * scale), 
-                                                                      (int)(frame.getDimension().getHeight() * scale)));
-         
-         ((Graphics2D)graphics).drawImage(
-            bufferedImage, 
-            destinationRectangle.x, 
-            destinationRectangle.y, 
-            (destinationRectangle.x + destinationRectangle.width), 
-            (destinationRectangle.y + destinationRectangle.height), 
-            sourceRectangle.x, 
-            sourceRectangle.y, 
-            (sourceRectangle.x+ sourceRectangle.width), 
-            (sourceRectangle.y + sourceRectangle.height), 
-            null);
+         // TODO
       }
+      
+      if (flipVertical)
+      {
+         // TODO
+      }
+      
+      // Retrieve the current frame.
+      AnimationMap.Frame frame = animationMap.getFrame(animationId,  currentFrame);
+      
+      Rectangle sourceRectangle = new Rectangle(frame.getPosition(), frame.getDimension());
+      
+      Rectangle destinationRectangle = new Rectangle(position,
+                                                     new Dimension((int)(frame.getDimension().getWidth() * scale), 
+                                                                   (int)(frame.getDimension().getHeight() * scale)));
+      
+      ((Graphics2D)graphics).drawImage(
+         bufferedImage, 
+         destinationRectangle.x, 
+         destinationRectangle.y, 
+         (destinationRectangle.x + destinationRectangle.width), 
+         (destinationRectangle.y + destinationRectangle.height), 
+         sourceRectangle.x, 
+         sourceRectangle.y, 
+         (sourceRectangle.x+ sourceRectangle.width), 
+         (sourceRectangle.y + sourceRectangle.height), 
+         null);
    }
-   
-   @Override
-   public boolean isVisible()
-   {
-      return (isVisible);
-   }
-   
-   @Override
-   public void setVisible(boolean isVisible)
-   {
-      this.isVisible = isVisible;
-   } 
-   
    
    // **************************************************************************
    //                        xml.Serializable interface
@@ -453,7 +437,7 @@ public class Animation extends Property implements Updatable, Drawable
               (isFinalFrame == true));
    }
    
-   public void deserializeThis(XmlNode node) throws XmlFormatException
+   private void deserializeThis(XmlNode node) throws XmlFormatException
    {
       // imageResource
       if (node.hasAttribute("imageResource"))

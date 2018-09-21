@@ -1,9 +1,17 @@
 package com.toast.game.engine;
 
+import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.geom.AffineTransform;
+
 import javax.swing.JComponent;
 
+import com.toast.game.engine.actor.Actor;
+import com.toast.game.engine.collision.CollisionManager;
 import com.toast.game.engine.message.Message;
 import com.toast.game.engine.message.Messenger;
 
@@ -31,6 +39,52 @@ public class Input
          public void keyTyped(KeyEvent event)
          {
             Input.handleKeyTyped(event);
+         }
+      });
+      
+      component.addMouseListener(new MouseListener()
+      {
+         @Override
+         public void mouseClicked(MouseEvent event)
+         {
+            Input.handleMouseClicked(event);
+         }
+
+         @Override
+         public void mouseEntered(MouseEvent event)
+         {
+         }
+
+         @Override
+         public void mouseExited(MouseEvent event)
+         {
+         }
+
+         @Override
+         public void mousePressed(MouseEvent event)
+         {
+            Input.handleMousePressed(event);
+         }
+
+         @Override
+         public void mouseReleased(MouseEvent event)
+         {
+            Input.handleMouseReleased(event);
+         }
+      });
+      
+      component.addMouseMotionListener(new MouseMotionListener()
+      {
+         @Override
+         public void mouseDragged(MouseEvent event)
+         {
+            Input.handleMouseDragged(event);
+         }
+
+         @Override
+         public void mouseMoved(MouseEvent event)
+         {
+            Input.handleMouseMoved(event);
          }
       });
    }
@@ -61,57 +115,73 @@ public class Input
   
    }
    
-   /*
-   public static void handleMousePressed(
-      MouseEvent e)
+   protected static void handleMouseClicked(MouseEvent event)
    {
-      mousePosition.x = e.getX();
-      mousePosition.y = e.getY();
+      //Actor clickedActor = getClickedActor(event);
       
-      Sprite clickedSprite = getClickedSprite(e);
-      
-      if (clickedSprite != null)
+      //if (clickedActor != null)
       {
-         Event event = new Event("eventMOUSE_PRESSED");
-         event.addPayload("mouseEvent", e);
-         EventManager.sendEvent(event, clickedSprite.getSpriteId());
+         Messenger.sendMessage(new Message("msgMOUSE_CLICKED", 
+                                           "input", 
+                                           null, 
+                                           new Message.Parameter("mouseEvent", event)));
       }
       
-      SelectionManager.getInstance().mousePressed(e);
+      //SelectionManager.getInstance().mouseClicked(event);
    }
-      
-      
-   public static void handleMouseReleased(
-      MouseEvent e)
+
+   protected static void handleMousePressed(MouseEvent event)
    {
-      mousePosition.x = e.getX();
-      mousePosition.y = e.getY();
+      //Actor clickedActor = getClickedActor(event);
       
-      Sprite clickedSprite = getClickedSprite(e);
-      
-      if (clickedSprite != null)
+      //if (clickedActor != null)
       {
-         Event event = new Event("eventMOUSE_RELEASED");
-         event.addPayload("mouseEvent", e);
-         EventManager.sendEvent(event, clickedSprite.getSpriteId());
+         Messenger.sendMessage(new Message("msgMOUSE_PRESSED", 
+                                           "input", 
+                                           null, 
+                                           new Message.Parameter("mouseEvent", event)));
       }
       
-      SelectionManager.getInstance().mouseReleased(e);
+      //SelectionManager.getInstance().mousePressed(e);
    }
-   
-   
+      
+   public static void handleMouseReleased(MouseEvent event)
+   {
+      //Actor clickedActor = getClickedActor(event);
+      
+      //if (clickedActor != null)
+      {
+         Messenger.sendMessage(new Message("msgMOUSE_RELEASED", 
+                                           "input", 
+                                           null, 
+                                           new Message.Parameter("mouseEvent", event)));
+      }      
+      
+      //SelectionManager.getInstance().mouseReleased(e);
+   }
+      
    public static void handleMouseMoved(
-      MouseEvent e)         
+      MouseEvent event)         
    {
-      mousePosition.x = e.getX();
-      mousePosition.y = e.getY();
+      mousePosition.x = event.getX();
+      mousePosition.y = event.getY();
+      
+      Messenger.sendMessage(new Message("msgMOUSE_MOVED", 
+                                        "input", 
+                                        null, 
+                                        new Message.Parameter("mouseEvent", event)));
    }
-   
-   
+      
    public static void handleMouseDragged(
-      MouseEvent e)
+      MouseEvent event)
    {
-      SelectionManager.getInstance().mouseDragged(e);
+      mousePosition.x = event.getX();
+      mousePosition.y = event.getY();
+      
+      Messenger.sendMessage(new Message("msgMOUSE_DRAGGED", 
+                                        "input", 
+                                        null, 
+                                        new Message.Parameter("mouseEvent", event)));
    }
 
    
@@ -119,32 +189,38 @@ public class Input
    {
       return (mousePosition);
    }
-
    
    public static Point getMouseWorldPosition()
    {
-      return (ViewManager.getWorldPosition(mousePosition));
+      Point worldPosition = new Point();
+
+      AffineTransform transform = Game.getRenderer().getWorldTransform();
+     
+      transform.transform(mousePosition,  worldPosition);
+      
+      return (worldPosition);
    }
-   */
    
    // **************************************************************************
    //                          Private Attributes
    // **************************************************************************
   
-   //static Point mousePosition;
+   static Point mousePosition = new Point();
    
    
    // **************************************************************************
    //                          Private Operations
    // **************************************************************************
    
-   /*
-   private static Sprite getClickedSprite(
-      MouseEvent e)
+   private static Actor getClickedActor(
+      MouseEvent event)
    {
+      Actor clickedActor = null;
+      
+      /*
       Sprite clickedSprite = null;
       
-      Point mousePosition = new Point(e.getX(), e.getY());
+      Point mousePosition = new Point(event.getX(), event.getY());
       Point worldMousePosition = ViewManager.getWorldPosition(mousePosition);
       
       // Get a list of Sprites that contain the clicked position.
@@ -160,8 +236,8 @@ public class Input
             break;
          }
       }
+      */
       
-      return (clickedSprite);
+      return (clickedActor);
    }
-   */  
 }

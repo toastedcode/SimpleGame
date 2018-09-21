@@ -125,7 +125,7 @@ public class SceneTest
       assertTrue(node.getName().equals(scene.getNodeName()));
       
       // id
-      assertTrue(node.getAttribute("id").equals(sceneId));
+      assertTrue(node.getAttribute("id").getValue().equals(sceneId));
    }
 
    @Test
@@ -139,7 +139,7 @@ public class SceneTest
       scene.deserialize(node);
       
       // id
-      assertTrue(node.getAttribute("id").equals(sceneId));
+      assertTrue(node.getAttribute("id").getValue().equals(sceneId));
    }
 
 }

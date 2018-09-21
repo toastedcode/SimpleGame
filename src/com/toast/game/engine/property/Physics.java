@@ -1,8 +1,6 @@
 package com.toast.game.engine.property;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.toast.game.common.Vector2D;
@@ -29,6 +27,8 @@ public class Physics extends Property implements Updatable, CollisionHandler
    public Physics(XmlNode node) throws XmlFormatException
    {
       super(node);
+      
+      deserializeThis(node);         
    }
    
    public Property clone()
@@ -138,11 +138,6 @@ public class Physics extends Property implements Updatable, CollisionHandler
       this.viscosity = viscosity;
    }
    
-   public boolean isCollided(Actor actor)
-   {
-      return (collisions.containsKey(actor.getId()));
-   }
-   
    // **************************************************************************
    //                        CollisionManager interface
    
@@ -151,6 +146,10 @@ public class Physics extends Property implements Updatable, CollisionHandler
    {
       Actor actor = getParent();
       Actor collidedActor = (Actor)collision.getOther(actor);
+      
+      // Resolve collision.
+      
+      // Adjust velocity.
    }
    
    @Override
@@ -200,11 +199,17 @@ public class Physics extends Property implements Updatable, CollisionHandler
    //                        xml.Serializable interface
    
    /*
-   <motor id="">
-      <keyMap>
-         <key keyId=""></key>
-      </keyMap>
-   </motor>
+   <physics id="">
+      <isEnabled/>
+      <mass/>
+      <velocity x="" y=""/>
+      <acceleration x="" y=""/>
+      <gravity x="" y=""/>
+      <drag/>
+      <friction/>
+      <elasticity/>
+      <viscosity/>
+   </physics>
    */
    
    @Override
@@ -222,34 +227,49 @@ public class Physics extends Property implements Updatable, CollisionHandler
       propertyNode.appendChild("isEnabled", isEnabled);
       
       // mass
-      propertyNode.appendChild("mass", mass);
+      if (mass > 0)
+      {
+         propertyNode.appendChild("mass", mass);
+      }
       
       // velocity
       XmlNode vectorNode = propertyNode.appendChild("velocity");
-      vectorNode.appendChild("x", velocity.x);
-      vectorNode.appendChild("y", velocity.y);
+      vectorNode.setAttribute("x",  velocity.x);
+      vectorNode.setAttribute("y",  velocity.y);
       
       // velocity
       vectorNode = propertyNode.appendChild("acceleration");
-      vectorNode.appendChild("x", acceleration.x);
-      vectorNode.appendChild("y", acceleration.y);
+      vectorNode.setAttribute("x",  acceleration.x);
+      vectorNode.setAttribute("y",  acceleration.y);
       
       // velocity
       vectorNode = propertyNode.appendChild("gravity");
-      vectorNode.appendChild("x", gravity.x);
-      vectorNode.appendChild("y", gravity.y);
+      vectorNode.setAttribute("x",  gravity.x);
+      vectorNode.setAttribute("y",  gravity.y);
       
       // drag
-      propertyNode.appendChild("drag", drag);
+      if (drag > 0)
+      {
+         propertyNode.appendChild("drag", drag);
+      }
       
       // friction
-      propertyNode.appendChild("friction", friction);
+      if (friction > 0)
+      {
+         propertyNode.appendChild("friction", friction);
+      }
       
       // elasticity
-      propertyNode.appendChild("elasticity", elasticity);
+      if (elasticity > 0)
+      {
+         propertyNode.appendChild("elasticity", elasticity);
+      }
       
-      // elasticity
-      propertyNode.appendChild("viscosity", viscosity);
+      // viscosity
+      if (viscosity > 0)
+      {
+         propertyNode.appendChild("viscosity", viscosity);
+      }
 
       return (propertyNode);
    }
@@ -259,37 +279,66 @@ public class Physics extends Property implements Updatable, CollisionHandler
    {
       super.deserialize(node);
       
-      // isEnabled
-      isEnabled = node.getChild("isEnabled").getBoolValue();
-      
-      // mass
-      mass = node.getChild("mass").getIntValue();
-      
-      // velocity
-      velocity = XmlUtils.getVector(node.getChild("vecocity"));
-      
-      // acceleration
-      acceleration = XmlUtils.getVector(node.getChild("acceleration"));
-      
-      // gravity
-      gravity = XmlUtils.getVector(node.getChild("gravity"));
-      
-      // drag
-      drag = node.getChild("drag").getDoubleValue();
-      
-      // friction
-      friction = node.getChild("friction").getDoubleValue();
-      
-      // elasticity
-      elasticity = node.getChild("elasticity").getDoubleValue();
-      
-      // viscosity
-      viscosity = node.getChild("viscosity").getDoubleValue();
+      deserializeThis(node);
    }
    
    // **************************************************************************
    //                          Private Attributes
    // **************************************************************************
+   
+   public void deserializeThis(XmlNode node) throws XmlFormatException
+   {
+      // isEnabled
+      isEnabled = node.getChild("isEnabled").getBoolValue();
+      
+      // mass
+      if (node.hasChild("mass"))
+      {
+         mass = node.getChild("mass").getIntValue();
+      }
+      
+      // velocity
+      if (node.hasChild("velocity"))
+      {
+         velocity = XmlUtils.getVector(node.getChild("velocity"));
+      }
+      
+      // acceleration
+      if (node.hasChild("acceleration"))
+      {
+         acceleration = XmlUtils.getVector(node.getChild("acceleration"));
+      }
+      
+      // gravity
+      if (node.hasChild("gravity"))
+      {
+         gravity = XmlUtils.getVector(node.getChild("gravity"));
+      }
+      
+      // drag
+      if (node.hasChild("drag"))
+      {
+         drag = node.getChild("drag").getDoubleValue();
+      }
+      
+      // friction
+      if (node.hasChild("friction"))
+      {
+         friction = node.getChild("friction").getDoubleValue();
+      }
+      
+      // elasticity
+      if (node.hasChild("elasticity"))
+      {
+         elasticity = node.getChild("elasticity").getDoubleValue();
+      }
+      
+      // viscosity
+      if (node.hasChild("viscosity"))
+      {
+         viscosity = node.getChild("viscosity").getDoubleValue();
+      }
+   }
    
    private static final int MILLISECONDS_PER_SECOND = 1000;
    

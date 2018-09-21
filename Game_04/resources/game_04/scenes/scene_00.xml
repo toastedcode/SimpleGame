@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scene id="scene_00">
+   <dimension width="576" height="384"/>
+   <actors>
+	   <actor id="background_00">
+	      <properties>
+	         <image id="imgBackground" resource="castle.png"/>
+	      </properties>
+	   </actor>
+	   <character id="player">
+	      <position x="120" y="240"/>
+	      <properties>
+	         <collision id="collision">
+	             <rectangle x="0" y="00" width="64" height="64"/>
+	         </collision>
+	         <script id="playerScript" resource="player.bsh"/>
+	         <mailbox id="mailbox">
+	            <message id="msgMOUSE_PRESSED"/>
+	            <message id="msgMOUSE_RELEASED"/>
+	            <message id="msgMOUSE_DRAGGED"/>
+	         </mailbox>
+	         <animationGroup id="characterAnimations">
+	            <currentAnimation id="idle_down" direction="FORWARD" type="LOOP"/>
+	            <!--  Idle animations -->
+	            <animation id="idle_right" imageResource="skeleton.png" animationResource="skeleton.anim" frameRate="15"/>
+	            <animation id="idle_left" imageResource="skeleton.png" animationResource="skeleton.anim"  frameRate="15"/>
+	            <animation id="idle_up" imageResource="skeleton.png" animationResource="skeleton.anim"  frameRate="15"/>
+	            <animation id="idle_down" imageResource="skeleton.png" animationResource="skeleton.anim"  frameRate="15"/>
+	            <!--  Walk animations -->
+		         <animation id="walk_right" imageResource="skeleton.png" animationResource="skeleton.anim"  frameRate="15"/>
+		         <animation id="walk_left" imageResource="skeleton.png" animationResource="skeleton.anim"  frameRate="15"/>
+		         <animation id="walk_up" imageResource="skeleton.png" animationResource="skeleton.anim"  frameRate="15"/>
+		         <animation id="walk_down" imageResource="skeleton.png" animationResource="skeleton.anim"  frameRate="15"/>
+	         </animationGroup>
+	         <physics id="physics">
+	            <isEnabled>true</isEnabled>
+	            <velocity x="0" y="0"/>
+	         </physics>
+	      </properties>
+	      <states>
+	         <state id="walk_right"/>
+	         <state id="walk_left"/>
+	         <state id="walk_up"/>
+	         <state id="walk_down"/>
+	         <state id="idle_left"/>
+	         <state id="idle_right"/>
+	         <state id="idle_up"/>
+	         <state id="idle_down"/>
+	      </states>
+	      <state>idle_down</state>
+	   </character>
+	</actors>
+</scene>

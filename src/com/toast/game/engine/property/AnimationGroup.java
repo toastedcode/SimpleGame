@@ -89,18 +89,6 @@ public class AnimationGroup extends Property implements Updatable, Drawable
    {
       return ((int)dimension.getHeight());
    }
-
-   @Override
-   public boolean isVisible()
-   {
-      return (isVisible);
-   }
-
-   @Override
-   public void setVisible(boolean isVisible)
-   {
-      this.isVisible = isVisible;
-   }
    
    @Override
    public void draw(Graphics graphics)
@@ -189,19 +177,11 @@ public class AnimationGroup extends Property implements Updatable, Drawable
          
          setAnimation(animationId, animationType, animationDirection);
       }
-      
-      // isVisible
-      if (node.hasChild("isVisible"))
-      {
-         isVisible = node.getChild("isVisible").getBoolValue();
-      }  
    }
    
    Map<String, Animation> animations = new HashMap<>();
    
    Animation currentAnimation = null;
-
-   private boolean isVisible = true;
    
    private Dimension dimension = new Dimension();
 }

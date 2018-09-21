@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<game>
-	<scene id="sceneOne">
-	   <actor id="actor"/>
-	</scene>
-</game>
+<scene id="sceneOne">
+   <dimension width="1020" height="435"/>
+   <actors>
+      <actor id="actor"/>
+   </actors>
+</scene>

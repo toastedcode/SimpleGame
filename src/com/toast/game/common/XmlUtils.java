@@ -17,17 +17,17 @@ public class XmlUtils
    
    public static Vector2D getVector(XmlNode node) throws XmlFormatException
    {
-      Vector2D vector = new Vector2D(node.getChild("x").getDoubleValue(), node.getChild("y").getDoubleValue());
+      Vector2D vector = new Vector2D(node.getAttribute("x").getDoubleValue(), node.getAttribute("y").getDoubleValue());
       
       return (vector);
    }
    
    public static Rectangle getRectangle(XmlNode node) throws XmlFormatException
    {
-      Rectangle rectangle = new Rectangle(node.getChild("x").getIntValue(), 
-                                          node.getChild("y").getIntValue(),
-                                          node.getChild("width").getIntValue(),
-                                          node.getChild("height").getIntValue());
+      Rectangle rectangle = new Rectangle(node.getAttribute("x").getIntValue(), 
+                                          node.getAttribute("y").getIntValue(),
+                                          node.getAttribute("width").getIntValue(),
+                                          node.getAttribute("height").getIntValue());
       
       return (rectangle);
    }

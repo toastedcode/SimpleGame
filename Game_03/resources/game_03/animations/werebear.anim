@@ -1,13 +1,21 @@
 <animationMap>
    <frame x="0" y="0" height = "128" width = "128" rows="8" columns="28"/>
    <!-- Idle animations -->
-   <animation id="idle_left" startFrame = "0" endFrame = "19"/>
-   <animation id="idle_right" startFrame = "0" endFrame = "19"/>
-   <animation id="idle_up" startFrame = "0" endFrame = "19"/>
-   <animation id="idle_down" startFrame = "0" endFrame = "19"/>
+   <animation id="idle_left" startFrame = "0" endFrame = "3"/>
+   <animation id="idle_right" startFrame = "112" endFrame = "115"/>
+   <animation id="idle_up" startFrame = "56" endFrame = "59"/>
+   <animation id="idle_down" startFrame = "168" endFrame = "171"/>
+   <animation id="idle_up_right" startFrame = "84" endFrame = "87"/>
+   <animation id="idle_up_left" startFrame = "28" endFrame = "31"/>
+   <animation id="idle_down_right" startFrame = "140" endFrame = "143"/>
+   <animation id="idle_down_left" startFrame = "196" endFrame = "199"/>
    <!-- Walk animations -->
-   <animation id="walk_left" startFrame = "0" endFrame = "19"/>
-   <animation id="walk_right" startFrame = "0" endFrame = "19"/>
-   <animation id="walk_up" startFrame = "0" endFrame = "19"/>
-   <animation id="walk_down" startFrame = "0" endFrame = "19"/>
+   <animation id="walk_left" startFrame = "4" endFrame = "11"/>
+   <animation id="walk_right" startFrame = "116" endFrame = "123"/>
+   <animation id="walk_up" startFrame = "59" endFrame = "66"/>
+   <animation id="walk_down" startFrame = "172" endFrame = "179"/>
+   <animation id="walk_up_right" startFrame = "88" endFrame = "91"/>
+   <animation id="walk_up_left" startFrame = "32" endFrame = "39"/>
+   <animation id="walk_down_right" startFrame = "144" endFrame = "151"/>
+   <animation id="walk_down_left" startFrame = "200" endFrame = "207"/>
 </animationMap>

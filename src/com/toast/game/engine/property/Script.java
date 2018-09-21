@@ -233,18 +233,6 @@ public class Script extends Property implements Drawable, Updatable, MessageHand
       return (0);
    }
    
-   @Override
-   public boolean isVisible()
-   {
-      return (true);
-   }
-   
-   @Override
-   public void setVisible(boolean isVisible)
-   {
-      // TODO.
-   }
-   
    // **************************************************************************
    //                            Updatable interface
    
@@ -279,16 +267,22 @@ public class Script extends Property implements Drawable, Updatable, MessageHand
    @Override
    public void onCollision(Collision collision)
    {
-      evaluate(Script.Function.ON_COLLISION, 
-               new Script.Variable("actor", getParent()),
-               new Script.Variable("collision", collision));
+      if (supports(Script.Function.ON_COLLISION.getCallString()))
+      {
+         evaluate(Script.Function.ON_COLLISION, 
+                  new Script.Variable("actor", getParent()),
+                  new Script.Variable("collision", collision));
+      }
    }
    
    @Override
    public void onSeparation(Collidable collided)
    {
-      evaluate(Script.Function.ON_SEPARATION, 
-               new Script.Variable("collided", (Actor)collided));
+      if (supports(Script.Function.ON_SEPARATION.getCallString()))
+      {
+         evaluate(Script.Function.ON_SEPARATION, 
+                  new Script.Variable("collided", (Actor)collided));
+      }
    }
    
    // **************************************************************************

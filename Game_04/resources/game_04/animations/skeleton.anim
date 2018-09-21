@@ -1,0 +1,13 @@
+<animationMap>
+   <frame x="0" y="0" height = "64" width = "64" rows="4" columns="9"/>
+   <!-- Idle animations -->
+   <animation id="idle_left" startFrame = "9" endFrame = "9"/>
+   <animation id="idle_right" startFrame = "27" endFrame = "27"/>
+   <animation id="idle_up" startFrame = "0" endFrame = "0"/>
+   <animation id="idle_down" startFrame = "18" endFrame = "18"/>
+   <!-- Walk animations -->
+   <animation id="walk_left" startFrame = "9" endFrame = "17"/>
+   <animation id="walk_right" startFrame = "27" endFrame = "35"/>
+   <animation id="walk_up" startFrame = "0" endFrame = "8"/>
+   <animation id="walk_down" startFrame = "18" endFrame = "26"/>
+</animationMap>

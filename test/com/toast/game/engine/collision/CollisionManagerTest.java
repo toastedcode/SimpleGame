@@ -75,17 +75,6 @@ public class CollisionManagerTest
       }
 
       @Override
-      public boolean isVisible()
-      {
-         return (true);
-      }
-
-      @Override
-      public void setVisible(boolean isVisible)
-      {
-      }
-
-      @Override
       public int getWidth()
       {
          return ((int)rectangle.getWidth());

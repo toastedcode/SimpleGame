@@ -7,6 +7,7 @@ import javax.swing.JPanel;
 
 import com.toast.game.engine.actor.Actor;
 import com.toast.game.engine.actor.Timer;
+import com.toast.game.engine.collision.CollisionManager;
 import com.toast.game.engine.message.Message;
 import com.toast.game.engine.message.Messenger;
 
@@ -126,6 +127,11 @@ public class Game
       Game.remove(Game.getActor(id));
    }
    
+   public static Renderer getRenderer()
+   {
+      return (renderer);
+   }
+   
    // **************************************************************************
    //                             Private operations
    // **************************************************************************
@@ -210,6 +216,8 @@ public class Game
       if (currentScene != null)
       {
          currentScene.update(elapsedTime);
+         
+         CollisionManager.update(elapsedTime);
       }
    }
    
