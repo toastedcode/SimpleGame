@@ -62,9 +62,6 @@ $RECYCLE.BIN/
 # Java
 # =========================
 
-*.jar
-*.war
-*.ear
 *.class
 
 # Eclipse
@@ -83,4 +80,5 @@ local.properties
 .classpath
 .settings/
 .loadpath
+*.classpath
 .classpath
