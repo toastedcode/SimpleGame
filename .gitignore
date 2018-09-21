@@ -59,6 +59,28 @@ $RECYCLE.BIN/
 *.lnk
 *.classpath
 
+# Java
+# =========================
+
+*.jar
+*.war
+*.ear
+*.class
+
 # Eclipse
-*.project
-*.classpath
+# =========================
+
+.project
+.metadata
+bin/**
+tmp/**
+tmp/**/*
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.classpath
+.settings/
+.loadpath
+.classpath
