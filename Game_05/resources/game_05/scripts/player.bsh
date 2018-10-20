@@ -1,0 +1,159 @@
+import com.toast.game.engine.*;
+import com.toast.game.common.Vector2D;
+import java.awt.geom.Point2D;
+
+// **************************************************************************
+//                            Public Operations
+// **************************************************************************
+
+int idleBitMask  = 0;  // 0b0000;
+int rightBitMask = 8;  // 0b1000; 
+int leftBitMask  = 4;  // 0b0100;
+int upBitMask    = 2;  // 0b0010;
+int downBitMask  = 1;  // 0b0001;
+int upRightBitMask = (upBitMask & rightBitMask);
+int downRightBitMask = downBitMask & rightBitMask;
+int upLeftBitMask = upBitMask & leftBitMask;
+int downLeftBitMask = downBitMask & leftBitMask;
+
+int keyState = idleBitMask;
+
+public void handleMessage()
+{
+   switch (message.getMessageId())
+   {
+      case "msgLEFT":
+      case "msgRIGHT":
+      case "msgUP":
+      case "msgDOWN":
+      case "msgJUMP":
+      {
+         print("here");
+         handleKeyUpdate(message.getMessageId(), Boolean.valueOf(message.getPayload("isKeyPressed")));
+         break;
+      }
+
+      default:
+      {
+         break;
+      }
+   }
+}
+
+private void handleKeyUpdate(String messageId, boolean isPressed)
+{
+   switch (messageId)
+   {
+      case "msgLEFT":
+      {
+         updateKeyState(leftBitMask, isPressed);
+         break;
+      }
+      
+      case "msgRIGHT":
+      {
+         updateKeyState(rightBitMask, isPressed);
+         break;
+      }
+      
+      case "msgUP":
+      {
+         updateKeyState(upBitMask, isPressed);
+         break;
+      }
+      
+      case "msgDOWN":
+      {
+         updateKeyState(downBitMask, isPressed);
+         break;
+      }
+      
+      case "msgJUMP":
+      {
+         Vector2D velocity = actor.getPhysics().getVelocity(); 
+         actor.getPhysics().addVelocity(new Vector2D(0, -300));
+         break;
+      }
+
+      default:
+      {
+         break;
+      }
+   }
+   
+   updatePlayerState();
+}
+
+private void updateKeyState(int key, boolean isPressed)
+{
+   if (isPressed == true)
+   {
+      keyState |= key;   
+   } 
+   else
+   {
+      keyState &= (~key);
+   }
+}
+
+private void updatePlayerState()
+{
+   com.toast.game.engine.actor.Character character = (com.toast.game.engine.actor.Character)actor;
+
+   switch (keyState)
+   {
+      case idleBitMask:
+      {
+         character.setState("idle_right");
+         break;
+      }
+      
+      case rightBitMask:
+      {
+         character.setState("run_right");
+         break;
+      }
+      
+      case leftBitMask:
+      {
+         character.setState("run_left");
+         break;
+      }
+      
+      case upBitMask:
+      {
+         break;
+      }
+      
+      case downBitMask:
+      {
+         character.setState("crouch_down");
+         break;
+      }
+      
+      case upRightBitMask:
+      {
+         break;
+      }
+      
+      case downRightBitMask:
+      {
+         break;
+      }
+      
+      case upLeftBitMask:
+      {
+         break;
+      }
+      
+      case downLeftBitMask:
+      {
+         break;
+      }
+      
+      default:
+      {
+         break;
+      }
+   }
+}

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scene id="scene_00">
+   <dimension width="1920" height="1080"/>
+   <actors>
+	   <actor id="background_00" isVisible="true">
+	      <properties>
+	         <!-- image id="c_imgBackground_sky" resource="BG_1.png"/-->
+	         <!-- image id="b_imgBackground_forest" resource="BG_5_Forest_2.png"/-->
+	         <image id="a_imgBackground_platform" resource="BG_7_Walking_Platform.png"/>
+	         <collision id="collision">
+                <rectangle x="0" y="960" width="1080" height="10"/>
+            </collision>
+	      </properties>
+	   </actor>
+	   <character id="player">
+	      <position x="120" y="800"/>
+	      <properties>
+	         <collision id="collision">
+	             <rectangle x="50" y="50" width="100" height="140"/>
+	         </collision>
+	         <script id="playerScript" resource="player.bsh"/>
+	         <animationGroup id="characterAnimations">
+	            <currentAnimation id="idle_right" direction="FORWARD" type="LOOP"/>
+	            <animation id="idle_right" imageResource="FW_Hero_1_Running.png" transparentRGB="#55557f" animationResource="wizard.anim"  frameRate="15"/>
+               <animation id="idle_left" imageResource="FW_Hero_1_Running.png" transparentRGB="#55557f" animationResource="wizard.anim"  frameRate="15"/>
+		         <animation id="run_right" imageResource="FW_Hero_1_Running.png" transparentRGB="#55557f" animationResource="wizard.anim"  frameRate="15"/>
+		         <animation id="run_left" imageResource="FW_Hero_1_Running.png" transparentRGB="#55557f" animationResource="wizard.anim"  frameRate="15"/>
+	         </animationGroup>
+	         <physics id="physics">
+	            <isEnabled>true</isEnabled>
+	            <velocity x="0" y="0"/>
+	            <gravity x="0" y="800"/>
+	         </physics>
+	         <keyMap id="keyMap">
+	            <key keyId="32" messageId="msgJUMP"/>
+	            <key keyId="37" messageId="msgLEFT"/>
+	            <key keyId="39" messageId="msgRIGHT"/>
+	            <key keyId="38" messageId="msgUP"/>
+	            <key keyId="40" messageId="msgDOWN"/>
+	         </keyMap>         
+	         <mailbox id="mailbox">
+	            <message id="msgKEY_PRESSED"/>
+	            <message id="msgKEY_RELEASED"/>
+	         </mailbox>
+	      </properties>
+	      <states>
+	         <state id="run_right"/>
+	         <state id="run_left"/>
+	         <state id="idle_left"/>
+	         <state id="idle_right"/>
+	      </states>
+	      <state>idle_right</state>
+	   </character>
+	</actors>
+</scene>

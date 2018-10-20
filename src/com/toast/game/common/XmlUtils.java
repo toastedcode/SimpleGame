@@ -3,6 +3,7 @@ package com.toast.game.common;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.lang.reflect.Field;
 
@@ -14,6 +15,13 @@ public class XmlUtils
    // **************************************************************************
    //                                 Public
    // **************************************************************************
+   
+   public static Point getPoint(XmlNode node) throws XmlFormatException
+   {
+      Point point = new Point(node.getAttribute("x").getIntValue(), node.getAttribute("y").getIntValue());
+      
+      return (point);
+   }
    
    public static Vector2D getVector(XmlNode node) throws XmlFormatException
    {
@@ -69,6 +77,7 @@ public class XmlUtils
       return (font);
    }
    
+   /*
    public static Color getColor(XmlNode node) throws XmlFormatException
    {
       Color color;
@@ -87,6 +96,7 @@ public class XmlUtils
       
       return (color);
    }
+   */
       
    public static int getFontStyle(XmlNode node) throws XmlFormatException
    {

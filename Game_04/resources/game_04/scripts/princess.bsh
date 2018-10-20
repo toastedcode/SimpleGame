@@ -1,0 +1,27 @@
+import com.toast.game.engine.*;
+import com.toast.game.engine.property.Physics;
+import java.awt.geom.Point2D;
+import com.toast.game.common.Vector2D;
+
+// **************************************************************************
+//                            Public Operations
+// **************************************************************************
+
+boolean mouseState = false;
+
+public void handleMessage()
+{
+   switch (message.getMessageId())
+   {
+      case "msgMOUSE_CLICKED":
+      {
+         print(actor.getId() + " clicked");
+         break;
+      }
+
+      default:
+      {
+         break;
+      }
+   }
+}

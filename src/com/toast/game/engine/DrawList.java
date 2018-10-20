@@ -22,7 +22,8 @@ public class DrawList extends ArrayList<Actor>
          }
       }
       
-      sort(Z_ORDER_DESCENDING_COMPARATOR);
+      //sort(Z_ORDER_DESCENDING_COMPARATOR);
+      sort(Z_ORDER_ASCENDING_COMPARATOR);
    }
    
    @Override
@@ -31,7 +32,8 @@ public class DrawList extends ArrayList<Actor>
       boolean returnStatus = super.add(actor);
       if (returnStatus == true)
       {
-         sort(Z_ORDER_DESCENDING_COMPARATOR);
+         //sort(Z_ORDER_DESCENDING_COMPARATOR);
+         sort(Z_ORDER_ASCENDING_COMPARATOR);
       }
       
       return (returnStatus);
@@ -41,7 +43,10 @@ public class DrawList extends ArrayList<Actor>
    {
       for (Actor actor : this)
       {
-         actor.draw(renderer);
+         if (actor.isVisible())
+         {
+            actor.draw(renderer);
+         }
       }
    }
       
@@ -54,6 +59,15 @@ public class DrawList extends ArrayList<Actor>
       public int compare(Actor actor1, Actor actor2)
       {
          return(((actor1.getZOrder() > actor2.getZOrder()) ? -1 :
+                 (actor1.getZOrder() == actor2.getZOrder()) ? 0 : 1));
+      }
+   };
+   
+   private static final Comparator<Actor> Z_ORDER_ASCENDING_COMPARATOR = new Comparator<Actor>()
+   {
+      public int compare(Actor actor1, Actor actor2)
+      {
+         return(((actor1.getZOrder() < actor2.getZOrder()) ? -1 :
                  (actor1.getZOrder() == actor2.getZOrder()) ? 0 : 1));
       }
    };

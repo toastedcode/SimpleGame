@@ -42,36 +42,54 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
    {
       Actor actor = null;
       
-      if (actorClasses.isEmpty())
-      {
-         registerActorClass("actor", Actor.class);
-         registerActorClass("character", Character.class);
-         registerActorClass("camera", Camera.class);
-      }
+      Class<?> actorClass = null;
       
-      String className = node.getName();
-
       try
       {
-         if (actorClasses.containsKey(className))
+         switch (node.getName())
          {
-            Class<?> actorClass = actorClasses.get(className);
+            case "actor":
+            {
+               if (node.hasAttribute("class"))
+               {
+                  actorClass = Class.forName(node.getAttribute("class").getValue());  
+               }
+               else
+               {
+                  actorClass = Actor.class;
+               }
+               break;
+            }
             
-            actor = (Actor)actorClass.getConstructor(XmlNode.class).newInstance(node);
+            case "character":
+            {
+               actorClass = Character.class;
+               break;
+            }
+            
+            case "camera":
+            {
+               actorClass = Camera.class;
+               break;
+            }
+            
+            default:
+            {
+               break;
+            }
          }
+         
+         actor = (Actor)actorClass.getConstructor(XmlNode.class).newInstance(node);
       }
-      catch (IllegalAccessException | InvocationTargetException | InstantiationException | NoSuchMethodException e)
+      catch (ClassNotFoundException | IllegalAccessException | InvocationTargetException | InstantiationException | NoSuchMethodException | XmlFormatException e)
       {
          logger.log(Level.WARNING, 
-                    String.format("Failed to create actor [%s] from node: \n.", className, node.toString()));
+                    String.format("Failed to create actor [%s] from node: \n.", 
+                    (actorClass != null) ? actorClass.getName() : "UNKNOWN",
+                    node.toString()));
       }
       
       return (actor);
-   }
-   
-   public static void registerActorClass(String actorName, Class<?> actorClass)
-   {
-      actorClasses.put(actorName, actorClass);
    }
    
    public Actor(String id)
@@ -142,8 +160,15 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
       position.setLocation(x,  y);
    }
    
+   public Vector2D getDelta()
+   {
+      return (delta);
+   }
+   
    public Point2D.Double getCenter()
    {
+      Point2D.Double position = getPosition();
+      
       return (new Point2D.Double((position.getX() + (getWidth() / 2)),
                                  (position.getY() + (getHeight() / 2))));
    }
@@ -156,6 +181,8 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
    
    public Point2D.Double getFoot()
    {
+      Point2D.Double position = getPosition();
+      
       return (new Point2D.Double((position.getX() + (getWidth() / 2)),
                                  (position.getY() + getHeight())));
    }
@@ -168,7 +195,14 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
       
    public int getZOrder()
    {
-      return (zOrder);
+      int z = zOrder;
+      
+      if (yAsZOrder)
+      {
+         z = (int)getFoot().y;
+      }
+      
+      return (z);
    }
    
    public void setZOrder(int zOrder)
@@ -445,7 +479,6 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
    public void onCollision(Collision collision)
    {
       System.out.format("%s collided with %s\n", this.getId(), ((Actor)(collision.getOther(this))).getId());
-      moveBy(-delta.x, -delta.y);
       
       for (Property property : properties.values())
       {
@@ -586,7 +619,12 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
       }
       
       // zOrder
-      zOrder = XmlUtils.getInt(node, "isEnabled", 0);
+      if (node.hasChild("zOrder"))
+      {
+         XmlNode childNode = node.getChild("zOrder");
+         yAsZOrder = XmlUtils.getBool(childNode, "yAsZOrder", false);
+         zOrder = XmlUtils.getInt(childNode, "z", 0);
+      }
       
       // coordinatesType
       if (node.hasChild("coordinatesType"))
@@ -624,6 +662,8 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
    
    private int zOrder = 0;
    
+   private boolean yAsZOrder = false;
+   
    private CoordinatesType coordinatesType = CoordinatesType.WORLD;
    
    private Dimension dimension = new Dimension(0, 0);
@@ -637,6 +677,4 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
    private boolean isCollisionEnabled = true;
    
    private CollisionShape collisionShape = null;
-   
-   private static Map<String, Class<?>> actorClasses = new HashMap<>();
 }

@@ -7,11 +7,38 @@
 	         <image id="imgBackground" resource="castle.png"/>
 	      </properties>
 	   </actor>
+	   <actor id="topBorder">
+	      <properties>            
+	         <collision id="collision">
+               <rectangle x="0" y="212" width="560" height="10"/>
+            </collision>
+         </properties>
+	   </actor>
+      <actor id="bottomBorder">
+         <properties>            
+            <collision id="collision">
+               <rectangle x="0" y="344" width="560" height="10"/>
+            </collision>
+         </properties>
+      </actor>	   
+	   <actor id="princess">
+	      <position x="275" y="240"/>
+	      <zOrder yAsZOrder="true"/>
+         <properties>
+            <image id="imgPrincess" resource="princess.png"/>
+            <collision id="collision">
+                <rectangle x="0" y="40" width="28" height="10"/>
+            </collision>
+            <script id="princessScript" resource="princess.bsh"/>
+            <mailbox id="mailbox"/>
+         </properties>
+      </actor>
 	   <character id="player">
 	      <position x="120" y="240"/>
+	      <zOrder yAsZOrder="true"/>
 	      <properties>
 	         <collision id="collision">
-	             <rectangle x="0" y="00" width="64" height="64"/>
+	             <rectangle x="15" y="54" width="32" height="10"/>
 	         </collision>
 	         <script id="playerScript" resource="player.bsh"/>
 	         <mailbox id="mailbox">
