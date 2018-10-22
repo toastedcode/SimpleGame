@@ -332,6 +332,11 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
       return (properties.get(id));
    }
    
+   public Map<String, Property> getProperties()
+   {
+      return (properties);
+   }
+   
    public void removeProperty(Property property)
    {
       // TODO: Make this more OO, please!

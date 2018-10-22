@@ -47,6 +47,8 @@ public class Image extends Property implements Drawable
    {
       Image clone = new Image(getId(), bufferedImage);
       
+      clone.scale = scale.clone();
+      
       return (clone);
    }
    
