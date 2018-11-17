@@ -39,7 +39,7 @@ public class Image extends Property implements Drawable
    public Image(XmlNode node) throws XmlFormatException
    {
       super(node);
-      
+      scale = new Vector2D(1.0, 1.0);
       deserializeThis(node);
    }
    
