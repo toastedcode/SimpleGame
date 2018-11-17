@@ -11,6 +11,8 @@ import com.toast.xml.Serializable;
 import com.toast.xml.XmlNode;
 import com.toast.xml.exception.XmlFormatException;
 
+import jdk.nashorn.internal.runtime.regexp.joni.BitSet;
+
 public class Property implements Serializable
 {
    public static Property createProperty(XmlNode node)
@@ -120,6 +122,31 @@ public class Property implements Serializable
       deserializeThis(node);
    }
    
+   // **************************************************************************
+   //                           Syncable interface
+   
+   public boolean isChanged()
+   {
+      return (!changeSet.isEmpty());
+   }
+   
+   public XmlNode syncTo(XmlNode node)
+   {
+      XmlNode propertyNode = node.appendChild(getNodeName());
+      
+      // id
+      propertyNode.setAttribute("id",  id);
+      
+      return (propertyNode);
+   }
+   
+   public void syncFrom(XmlNode node) throws XmlFormatException
+   {
+      // Nothing to do here.
+   }
+   
+   // **************************************************************************
+   
    private void deserializeThis(XmlNode node) throws XmlFormatException
    {
       id = node.getAttribute("id").getValue();      
@@ -132,4 +159,6 @@ public class Property implements Serializable
    private String id;
    
    private Actor parent;
+   
+   private BitSet changeSet = new BitSet();
 }

@@ -2,6 +2,7 @@ package com.toast.game.engine.actor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 import com.toast.game.engine.property.Animation.AnimationDirection;
 import com.toast.game.engine.property.Animation.AnimationType;
@@ -9,7 +10,10 @@ import com.toast.game.engine.property.AnimationGroup;
 import com.toast.game.engine.property.Property;
 import com.toast.xml.XmlNode;
 import com.toast.xml.XmlNodeList;
+import com.toast.xml.XmlUtils;
 import com.toast.xml.exception.XmlFormatException;
+
+import jdk.nashorn.internal.runtime.regexp.joni.BitSet;
 
 public class Character extends Actor
 {
@@ -109,6 +113,33 @@ public class Character extends Actor
    }
    
    // **************************************************************************
+   //                           Syncable interface
+   
+   public XmlNode syncTo(XmlNode node)
+   {
+      XmlNode characterNode = super.syncTo(node);
+      
+      // state
+      if (changeSet.at(SyncableProperties.STATE.ordinal()))
+      {
+         characterNode.appendChild("state").setValue(state);
+      }
+      
+      return (characterNode);      
+   }
+   
+   public void syncFrom(XmlNode node) throws XmlFormatException
+   {
+      super.syncFrom(node);
+      
+      // state
+      if (node.hasAttribute("state"))
+      {
+         state = node.getChild("state").getValue();
+      }
+   }   
+   
+   // **************************************************************************
    //                                Protected
    // **************************************************************************
    
@@ -143,9 +174,16 @@ public class Character extends Actor
       }
    }
    
+   private enum SyncableProperties
+   {
+      STATE,      
+   }
+   
    private List<String> states = new ArrayList<>();
    
    private String state;
    
-   AnimationGroup animationGroup;
+   private AnimationGroup animationGroup;
+   
+   private BitSet changeSet = new BitSet();
 }

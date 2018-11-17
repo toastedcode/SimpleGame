@@ -10,6 +10,7 @@ import com.toast.game.engine.collision.CollisionManager;
 import com.toast.game.engine.interfaces.Drawable;
 import com.toast.game.engine.interfaces.Mailable;
 import com.toast.game.engine.interfaces.Movable;
+import com.toast.game.engine.interfaces.Syncable;
 import com.toast.game.engine.interfaces.Updatable;
 import com.toast.game.engine.message.Message;
 import com.toast.game.engine.message.MessageHandler;
@@ -25,6 +26,8 @@ import com.toast.xml.XmlNodeList;
 import com.toast.xml.XmlUtils;
 import com.toast.xml.exception.XmlFormatException;
 
+import jdk.nashorn.internal.runtime.regexp.joni.BitSet;
+
 import java.awt.Dimension;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
@@ -36,7 +39,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Actor implements Updatable, Movable, Mailable, Serializable, Collidable
+public class Actor implements Updatable, Movable, Mailable, Serializable, Collidable, Syncable
 {
    public static Actor createActor(XmlNode node)
    {
@@ -393,6 +396,9 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
    {
       if (isEnabled() == true)
       {
+         // Clear the change set.
+         changeSet.clear();
+         
          // Clear delta.
          delta.x = 0;
          delta.y = 0;
@@ -419,6 +425,9 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
       // Update delta. 
       delta.x += deltaX;
       delta.y += deltaY;
+      
+      // TODO: Temporary.
+      changeSet.set(SyncableProperties.POSITION.ordinal());
    }
 
    @Override
@@ -569,6 +578,114 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
       deserializeThis(node);
    }
    
+   // **************************************************************************
+   //                           Syncable interface
+   
+   public boolean isChanged()
+   {
+      return (!changeSet.isEmpty());
+   }
+   
+   public XmlNode syncTo(XmlNode node)
+   {
+      XmlNode actorNode = node.appendChild(getNodeName());
+      
+      // id
+      actorNode.setAttribute("id",  id);
+      
+      // isVisible
+      if (changeSet.at(SyncableProperties.IS_VISIBLE.ordinal()))
+      {
+         actorNode.appendChild("isVisible").setValue(Boolean.toString(isVisible));
+      }
+      
+      // isEnabled
+      if (changeSet.at(SyncableProperties.IS_ENABLED.ordinal()))
+      {
+         actorNode.appendChild("isEnabled").setValue(Boolean.toString(isEnabled));
+      }
+      
+      // position
+      if (changeSet.at(SyncableProperties.POSITION.ordinal()))
+      {
+         XmlNode childNode = actorNode.appendChild("position");
+         childNode.setAttribute("x",  (int)position.getX());
+         childNode.setAttribute("y",  (int)position.getY());
+      }
+      
+      // zOrder
+      if (changeSet.at(SyncableProperties.Z_ORDER.ordinal()))
+      {
+         actorNode.appendChild("zOrder").setValue(Integer.toString(zOrder));
+      }
+      
+      // properties
+      XmlNode childNode = actorNode.appendChild("properties");
+      for (Property property : properties.values())
+      {
+         if (property.isChanged())
+         {
+            property.syncTo(childNode);
+         }
+      }
+      
+      return (actorNode);      
+   }
+   
+   public void syncFrom(XmlNode node) throws XmlFormatException
+   {
+      // isVisible
+      if (node.hasAttribute("isVisible"))
+      {
+         isVisible = XmlUtils.getBool(node, "isVisible", true);
+      }
+      
+      // isEnabled
+      if (node.hasAttribute("isVisible"))
+      {
+         isEnabled = XmlUtils.getBool(node, "isEnabled", true);
+      }
+      
+      // position
+      if (node.hasChild("position"))
+      {
+         XmlNode childNode = node.getChild("position");
+         position.setLocation(childNode.getAttribute("x").getIntValue(), childNode.getAttribute("y").getIntValue());
+      }
+      
+      // zOrder
+      if (node.hasChild("zOrder"))
+      {
+         XmlNode childNode = node.getChild("zOrder");
+         zOrder = XmlUtils.getInt(childNode, "z", 0);
+      }
+      
+      // properties
+      if (node.hasChild("properties"))
+      {
+         XmlNodeList childNodes = node.getChild("properties").getChildren();
+         for (XmlNode childNode : childNodes)
+         {
+            String propertyId = childNode.getAttribute("id").getValue();
+            
+            Property property = getProperty(propertyId);
+            if (property != null)
+            {
+               property.syncTo(childNode);
+            }
+            else
+            {
+               logger.log(Level.WARNING, 
+                          String.format("Could not sync property [%s] in actor [%s].", 
+                                        propertyId, 
+                                        getId()));
+            }
+         }
+      }      
+   }
+   
+   // **************************************************************************
+   
    protected AffineTransform getTransform()
    {
       AffineTransform transform = new AffineTransform();
@@ -653,6 +770,14 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
       }      
    }
    
+   private enum SyncableProperties
+   {
+      IS_VISIBLE,
+      IS_ENABLED,
+      POSITION,
+      Z_ORDER
+   }
+   
    private final static Logger logger = Logger.getLogger(Property.class.getName());
    
    private String id;
@@ -682,4 +807,6 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
    private boolean isCollisionEnabled = true;
    
    private CollisionShape collisionShape = null;
+   
+   private BitSet changeSet = new BitSet();
 }

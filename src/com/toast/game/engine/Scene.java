@@ -5,12 +5,16 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.toast.game.common.LockableMap;
 import com.toast.game.common.XmlUtils;
 import com.toast.game.engine.actor.Actor;
 import com.toast.game.engine.actor.Camera;
+import com.toast.game.engine.interfaces.Syncable;
 import com.toast.game.engine.interfaces.Updatable;
+import com.toast.game.engine.property.Property;
 import com.toast.xml.Serializable;
 import com.toast.xml.XmlDocument;
 import com.toast.xml.XmlNode;
@@ -19,7 +23,7 @@ import com.toast.xml.exception.XmlFormatException;
 import com.toast.xml.exception.XmlParseException;
 import com.toast.xml.exception.XmlSerializeException;
 
-public class Scene implements Updatable, Serializable
+public class Scene implements Updatable, Serializable, Syncable
 {
    // **************************************************************************
    //                                  Public
@@ -266,6 +270,67 @@ public class Scene implements Updatable, Serializable
    }
    
    // **************************************************************************
+   //                             Syncable interface
+
+   @Override
+   public boolean isChanged()
+   {
+      // TODO
+      return (true);
+   }
+
+   @Override
+   public XmlNode syncTo(XmlNode node)
+   {
+      XmlNode sceneNode = node.appendChild("scene");
+      
+      // id
+      sceneNode.setAttribute("id", getId());
+      
+      // actors
+      if (actors.size() > 0)
+      {
+         XmlNode actorsNode = sceneNode.appendChild("actors");
+         
+         for (Actor actor : actors.values())
+         {
+            actor.syncTo(actorsNode);
+         }
+      }
+      
+      return (sceneNode);
+   }
+
+   @Override
+   public void syncFrom(XmlNode node) throws XmlFormatException
+   {
+      // actors
+      if (node.hasChild("actors"))
+      {
+         XmlNodeList actorNodes = node.getChild("actors").getChildren();
+         
+         for (XmlNode actorNode : actorNodes)
+         {
+            String actorId = actorNode.getAttribute("id").getValue();
+            
+            Actor actor = getActor(actorId);
+            
+            if (actor != null)
+            {
+               actor.syncFrom(actorNode);
+            }
+            else
+            {
+               logger.log(Level.WARNING, 
+                          String.format("Could not sync actor [%s] in scene [%s].", 
+                                        actorId, 
+                                        getId()));               
+            }
+         }
+      }
+   }
+   
+   // **************************************************************************
    //                                  Private
    // **************************************************************************
    
@@ -276,6 +341,8 @@ public class Scene implements Updatable, Serializable
          actor.initialize();
       }
    }
+   
+   private final static Logger logger = Logger.getLogger(Scene.class.getName());
    
    private String id;
    

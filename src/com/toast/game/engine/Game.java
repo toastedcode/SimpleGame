@@ -1,6 +1,7 @@
 package com.toast.game.engine;
 
 import java.awt.Graphics;
+import java.net.InetAddress;
 import java.util.Map;
 
 import javax.swing.JPanel;
@@ -10,6 +11,9 @@ import com.toast.game.engine.actor.Timer;
 import com.toast.game.engine.collision.CollisionManager;
 import com.toast.game.engine.message.Message;
 import com.toast.game.engine.message.Messenger;
+import com.toast.game.engine.network.Client;
+import com.toast.game.engine.network.Server;
+import com.toast.game.engine.network.Synchronize;
 
 public class Game
 {
@@ -132,6 +136,48 @@ public class Game
       return (renderer);
    }
    
+   public static void startServer(int listenPort)
+   {
+      server = new Server();
+      server.setup(listenPort);
+      server.start();
+   }
+   
+   public static void stopServer()
+   {
+      if (server != null)
+      {
+         server.end();
+         server = null;
+      }
+   }
+   
+   public static Server getServer()
+   {
+      return (server);
+   }
+   
+   public static void startClient(InetAddress address, int listenPort, int sendPort)
+   {
+      client = new Client();
+      client.setup(address, listenPort, sendPort);
+      client.start();
+   }
+   
+   public static void stopClient()
+   {
+      if (client != null)
+      {
+         client.end();
+         client = null;
+      }
+   }
+   
+   public static Client getClient()
+   {
+      return (client);
+   }
+   
    // **************************************************************************
    //                             Private operations
    // **************************************************************************
@@ -218,6 +264,11 @@ public class Game
          currentScene.update(elapsedTime);
          
          CollisionManager.update(elapsedTime);
+         
+         if (client != null)
+         {
+            Synchronize.syncTo(client);
+         }
       }
    }
    
@@ -242,4 +293,8 @@ public class Game
    private static Scene currentScene;
    
    private static boolean isPaused = false;
+   
+   private static Server server;
+   
+   private static Client client;
 }

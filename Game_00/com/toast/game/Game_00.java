@@ -3,6 +3,8 @@ package com.toast.game;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import javax.swing.JFrame;
 
@@ -49,6 +51,27 @@ public class Game_00
       
       frame.getContentPane().add(Game.getGamePanel(), BorderLayout.CENTER);
       frame.setVisible(true);
+      
+      if (args[0].equals("server"))
+      {
+         Game.startServer(Integer.valueOf(args[1]));
+      }
+      else if (args[0].equals("client"))
+      {
+         try
+         {
+            InetAddress address = InetAddress.getByName(args[1]);
+            int listenPort = Integer.valueOf(args[2]);
+            int sendPort = Integer.valueOf(args[3]);
+            
+            Game.startClient(address, listenPort, sendPort);
+            Game.getClient().register("Player One");
+         }
+         catch (UnknownHostException e)
+         {
+            
+         }
+      }
       
       Game.play();
    }
