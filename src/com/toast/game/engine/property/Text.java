@@ -181,7 +181,7 @@ public class Text extends Property implements Drawable
       // color
       if (node.hasAttribute("color"))
       {
-         color = XmlUtils.getColor(node);
+         color = com.toast.xml.XmlUtils.getColor(node, "color", Color.WHITE);
       }
       
       // paragraphWidth

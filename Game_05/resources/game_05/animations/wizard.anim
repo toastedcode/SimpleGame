@@ -1,0 +1,9 @@
+<animationMap>
+   <frame x="0" y="0" height = "198" width = "172" rows="3" columns="6"/>
+   <!-- Idle -->
+   <animation id="idle_right" startFrame = "0" endFrame = "0"/>
+   <animation id="idle_left" flipHorizontal="true" startFrame = "0" endFrame = "0"/>
+   <!-- Running -->
+   <animation id="run_right" startFrame = "0" endFrame = "14"/>
+   <animation id="run_left" flipHorizontal="true" startFrame = "0" endFrame = "14"/>
+</animationMap>

@@ -6,11 +6,15 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
+import java.util.List;
 
 import javax.swing.JComponent;
 
 import com.toast.game.engine.actor.Actor;
+import com.toast.game.engine.collision.Collidable;
 import com.toast.game.engine.collision.CollisionManager;
 import com.toast.game.engine.message.Message;
 import com.toast.game.engine.message.Messenger;
@@ -87,6 +91,15 @@ public class Input
             Input.handleMouseMoved(event);
          }
       });
+      
+      component.addMouseWheelListener(new MouseWheelListener()
+      {
+         @Override
+         public void mouseWheelMoved(MouseWheelEvent event)
+         {
+            Input.handleMouseWheelMoved(event);
+         }
+      });
    }
       
    protected static void handleKeyPressed(KeyEvent event)
@@ -117,47 +130,34 @@ public class Input
    
    protected static void handleMouseClicked(MouseEvent event)
    {
-      //Actor clickedActor = getClickedActor(event);
+      Messenger.sendMessage(new Message("msgMOUSE_CLICKED", 
+                                        "input", 
+                                        null, 
+                                        new Message.Parameter("mouseEvent", event)));
       
-      //if (clickedActor != null)
+      if (mouseOverActor != null)
       {
          Messenger.sendMessage(new Message("msgMOUSE_CLICKED", 
                                            "input", 
-                                           null, 
-                                           new Message.Parameter("mouseEvent", event)));
+                                           mouseOverActor.getAddress(), 
+                                           new Message.Parameter("mouseEvent", event)));         
       }
-      
-      //SelectionManager.getInstance().mouseClicked(event);
    }
 
    protected static void handleMousePressed(MouseEvent event)
    {
-      //Actor clickedActor = getClickedActor(event);
-      
-      //if (clickedActor != null)
-      {
-         Messenger.sendMessage(new Message("msgMOUSE_PRESSED", 
-                                           "input", 
-                                           null, 
-                                           new Message.Parameter("mouseEvent", event)));
-      }
-      
-      //SelectionManager.getInstance().mousePressed(e);
+      Messenger.sendMessage(new Message("msgMOUSE_PRESSED", 
+                                        "input", 
+                                        null, 
+                                        new Message.Parameter("mouseEvent", event)));
    }
       
    public static void handleMouseReleased(MouseEvent event)
    {
-      //Actor clickedActor = getClickedActor(event);
-      
-      //if (clickedActor != null)
-      {
-         Messenger.sendMessage(new Message("msgMOUSE_RELEASED", 
-                                           "input", 
-                                           null, 
-                                           new Message.Parameter("mouseEvent", event)));
-      }      
-      
-      //SelectionManager.getInstance().mouseReleased(e);
+      Messenger.sendMessage(new Message("msgMOUSE_RELEASED", 
+                                        "input", 
+                                        null, 
+                                        new Message.Parameter("mouseEvent", event)));
    }
       
    public static void handleMouseMoved(
@@ -170,6 +170,8 @@ public class Input
                                         "input", 
                                         null, 
                                         new Message.Parameter("mouseEvent", event)));
+      
+      updateMouseOver(event);
    }
       
    public static void handleMouseDragged(
@@ -182,9 +184,21 @@ public class Input
                                         "input", 
                                         null, 
                                         new Message.Parameter("mouseEvent", event)));
+      
+      updateMouseOver(event);
+   }
+   
+   public static void handleMouseWheelMoved(
+      MouseEvent event)
+   {
+      Messenger.sendMessage(new Message("msgMOUSE_WHEEL_MOVED", 
+                                        "input", 
+                                        null, 
+                                        new Message.Parameter("mouseEvent", event)));
+      
+      updateMouseOver(event);
    }
 
-   
    public static Point getMousePosition()
    {
       return (mousePosition);
@@ -201,43 +215,63 @@ public class Input
       return (worldPosition);
    }
    
+   public static Actor getMouseOverActor()
+   {
+      return (mouseOverActor);
+   }
+   
    // **************************************************************************
    //                          Private Attributes
    // **************************************************************************
   
    static Point mousePosition = new Point();
    
+   static Actor mouseOverActor = null;
    
    // **************************************************************************
    //                          Private Operations
    // **************************************************************************
    
-   private static Actor getClickedActor(
+   private static void updateMouseOver(
       MouseEvent event)
    {
-      Actor clickedActor = null;
+      Actor actor = null;
+      Actor mouseOverActor = null;
       
-      /*
-      Sprite clickedSprite = null;
+      List<Collidable> collidables = CollisionManager.checkIntersection(getMouseWorldPosition());
       
-      Point mousePosition = new Point(event.getX(), event.getY());
-      Point worldMousePosition = ViewManager.getWorldPosition(mousePosition);
-      
-      // Get a list of Sprites that contain the clicked position.
-      SpriteList sprites = CollisionManager.checkIntersection(worldMousePosition);
-      
-      // Loop through the Sprites until we find the top-most one that has it's collision enabled.
-      for (Sprite sprite : sprites)
+      for (Collidable collidable : collidables)
       {
-         if ((sprite.getCollision() != null) &&
-             (sprite.getCollision().isEnabled == true))
+         if (collidable instanceof Actor)
          {
-            clickedSprite = sprite;
-            break;
+            actor = (Actor)collidable;
+            
+            if ((mouseOverActor == null) || (actor.getZOrder() > mouseOverActor.getZOrder()))
+            {
+               mouseOverActor = actor;          
+            }
          }
       }
-      */
       
-      return (clickedActor);
+      if (mouseOverActor != Input.mouseOverActor)
+      {
+         if (Input.mouseOverActor != null)
+         {
+            Messenger.sendMessage(new Message("msgMOUSE_OFF", 
+                                              "input", 
+                                              Input.mouseOverActor.getAddress(),
+                                              new Message.Parameter("mouseEvent", event)));            
+         }
+         
+         if (mouseOverActor != null)
+         {
+            Messenger.sendMessage(new Message("msgMOUSE_ON", 
+                                              "input", 
+                                              mouseOverActor.getAddress(),
+                                              new Message.Parameter("mouseEvent", event)));            
+         }
+         
+         Input.mouseOverActor = mouseOverActor;
+      }
    }
 }

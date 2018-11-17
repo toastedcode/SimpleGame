@@ -15,8 +15,11 @@ public void handleMessage()
    {
       case "msgMOUSE_PRESSED":
       {
-         mouseState = true;
-         updatePlayerState(Input.getMouseWorldPosition(), mouseState);
+         if (Input.getMouseOverActor() == null)
+         {
+            mouseState = true;
+            updatePlayerState(Input.getMouseWorldPosition(), mouseState);
+         }
          break;
       }
       
@@ -34,6 +37,11 @@ public void handleMessage()
       }
       
       case "msgMOUSE_CLICKED":
+      {
+         print(actor.getId() + " clicked");
+         break;
+      }
+      
       case "msgMOUSE_MOVED":
       default:
       {

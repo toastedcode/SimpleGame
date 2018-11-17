@@ -1,5 +1,6 @@
 package com.toast.game.engine.property;
 
+import java.awt.Rectangle;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -77,6 +78,11 @@ public class Physics extends Property implements Updatable, CollisionHandler
    {
       this.velocity = velocity.clone();
    }
+   
+   public void addVelocity(Vector2D velocity)
+   {
+      this.velocity = Vector2D.add(this.velocity, velocity);
+   }
 
    public Vector2D getAcceleration()
    {
@@ -86,6 +92,16 @@ public class Physics extends Property implements Updatable, CollisionHandler
    public void setAcceleration(Vector2D acceleration)
    {
       this.acceleration = acceleration.clone();
+   }
+   
+   public Vector2D getThrust()
+   {
+      return (thrust);
+   }
+
+   public void setThrust(Vector2D thrust)
+   {
+      this.thrust = thrust.clone();
    }
 
    public Vector2D getGravity()
@@ -148,8 +164,11 @@ public class Physics extends Property implements Updatable, CollisionHandler
       Actor collidedActor = (Actor)collision.getOther(actor);
       
       // Resolve collision.
+      resolveCollision(collision);
       
       // Adjust velocity.
+      velocity.x = 0;
+      velocity.y = 0;
    }
    
    @Override
@@ -166,33 +185,40 @@ public class Physics extends Property implements Updatable, CollisionHandler
    {
       double elapsedSeconds = (double)elapsedTime / (double)MILLISECONDS_PER_SECOND;
       
-      // Apply gravity.
-      velocity.x += gravity.x * elapsedSeconds;  
-      velocity.y += gravity.y * elapsedSeconds;
-      
       // Apply acceleration.
-      velocity.x += acceleration.x * elapsedSeconds;  
-      velocity.y += acceleration.y * elapsedSeconds;
+      thrust.x += (acceleration.x * elapsedSeconds);  
+      thrust.y += (acceleration.y * elapsedSeconds);
+      
+      // Apply thrust
+      //velocity.
+      
+      // Apply gravity.
+      velocity.x += (gravity.x * elapsedSeconds);  
+      velocity.y += (gravity.y * elapsedSeconds);
       
       // Apply drag.
       velocity.x += velocity.x * -1.0 * (drag * elapsedSeconds);
       
       // Apply viscosity
+      /*
       for (Map.Entry<Actor, Collision> entry : collisions.entrySet())
       {
          Physics physics = entry.getKey().getPhysics();
          
          if ((physics != null) && (physics.isEnabled()))
          {
-            Vector2D.multiply(velocity,  (physics.getElasticity() * -1));
+            Vector2D.multiply(velocity,  (physics.getViscosity() * -1));
          }
       }
+      */
       
       // Determine the translation.
-      double deltaX = velocity.x * elapsedSeconds;
-      double deltaY = velocity.y * elapsedSeconds;
+      Vector2D delta = new Vector2D((velocity.x * elapsedSeconds), (velocity.y * elapsedSeconds));
       
-      getParent().moveBy(deltaX, deltaY);
+      if (delta.getMagnitude() > 0)
+      {
+         getParent().moveBy(delta.x, delta.y);
+      }
    }
    
    // **************************************************************************
@@ -340,6 +366,53 @@ public class Physics extends Property implements Updatable, CollisionHandler
       }
    }
    
+   private void resolveCollision(Collision collision)
+   {
+      Actor actor = getParent();
+      Actor collidedActor = (Actor)collision.getOther(actor);
+      
+      Rectangle myRect = actor.getCollisionShape().getBounds();
+      Rectangle otherRect = collidedActor.getCollisionShape().getBounds();
+      
+      Vector2D delta = actor.getDelta();
+      
+      Vector2D resolve = new Vector2D();
+      
+      // Resolve x-axis.
+      if (delta.x > 0)
+      {
+         resolve.x = (otherRect.x - (myRect.x + myRect.width));    
+      }
+      else if (delta.x < 0)
+      {
+         resolve.x = ((otherRect.x + otherRect.width) - myRect.x);
+      }
+      
+      // Resolve y-axis.
+      if (delta.y > 0)
+      {
+         resolve.y = (otherRect.y - (myRect.y + myRect.height)); 
+      }
+      else if (delta.y < 0)
+      {
+         resolve.y = ((otherRect.y + otherRect.height) - myRect.y);
+      }
+      
+      if ((resolve.x != 0) && (resolve.y != 0))
+      {
+         if (Math.abs(resolve.x) > Math.abs(resolve.y))
+         {
+            resolve.x = 0;
+         }
+         else if (Math.abs(resolve.y) > Math.abs(resolve.x))
+         {
+            resolve.y = 0;
+         }
+      }
+      
+      actor.moveBy(resolve.x, resolve.y);
+   }
+   
    private static final int MILLISECONDS_PER_SECOND = 1000;
    
    private boolean isEnabled;
@@ -349,6 +422,8 @@ public class Physics extends Property implements Updatable, CollisionHandler
    private Vector2D velocity = new Vector2D(0, 0);
 
    private Vector2D acceleration = new Vector2D(0, 0);
+   
+   private Vector2D thrust = new Vector2D(0, 0);
    
    private Vector2D gravity = new Vector2D(0, 0);
    

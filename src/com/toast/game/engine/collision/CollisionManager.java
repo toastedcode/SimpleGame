@@ -1,5 +1,6 @@
 package com.toast.game.engine.collision;
 
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -31,6 +32,22 @@ public class CollisionManager
       List<Collision> newCollisions = calculateCollisions();
       
       updateCollisions(newCollisions);
+   }
+   
+   static public List<Collidable> checkIntersection(Point2D point)
+   {
+      List<Collidable> intersections = new ArrayList<Collidable>();
+      
+      for (Collidable collidable : collidables)
+      {
+         if (collidable.isCollisionEnabled() &&
+             collidable.getCollisionShape().contains(point))
+         {
+            intersections.add(collidable);
+         }
+      }
+      
+      return (intersections);
    }
    
    static public boolean isCollided(Collidable collidableA, Collidable collidableB)
@@ -97,6 +114,7 @@ public class CollisionManager
       // New/updated collisions
       //
       
+      /*
       for (Collision collision : newCollisions)
       {
          Collision currentCollison = getCollision(collision.first(), collision.second());
@@ -111,6 +129,22 @@ public class CollisionManager
             collision.first().onCollision(collision);
             collision.second().onCollision(collision);
          }
+      }
+      */
+      for (Collision collision : newCollisions)
+      {
+         Collision currentCollison = getCollision(collision.first(), collision.second());
+         
+         boolean newCollision = (currentCollison == null);
+         boolean updatedCollision = ((!newCollision) && (!collision.equals(currentCollison)));
+         
+         if (newCollision || updatedCollision)
+         {
+            addCollision(collision);
+         }
+
+         collision.first().onCollision(collision);
+         collision.second().onCollision(collision);
       }
    }
    /*

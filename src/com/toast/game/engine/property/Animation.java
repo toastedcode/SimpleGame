@@ -1,5 +1,6 @@
 package com.toast.game.engine.property;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -15,6 +16,7 @@ import com.toast.game.engine.message.Messenger;
 import com.toast.game.engine.resource.ImageResource;
 import com.toast.game.engine.resource.XmlResource;
 import com.toast.xml.XmlNode;
+import com.toast.xml.XmlUtils;
 import com.toast.xml.exception.XmlFormatException;
 
 public class Animation extends Property implements Updatable, Drawable
@@ -447,7 +449,16 @@ public class Animation extends Property implements Updatable, Drawable
          
          if (imageResource != null)
          {
-            bufferedImage = imageResource.getImage();
+            Color transparentColor = XmlUtils.getColor(node, "transparentRGB", null);
+            
+            if (transparentColor != null)
+            {
+               bufferedImage = imageResource.getImage(transparentColor);
+            }
+            else
+            {
+               bufferedImage = imageResource.getImage();
+            }
          }
       }
       
