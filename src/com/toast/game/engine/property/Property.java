@@ -7,13 +7,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.toast.game.engine.actor.Actor;
+import com.toast.game.engine.interfaces.Syncable;
+import com.toast.game.engine.interfaces.Updatable;
 import com.toast.xml.Serializable;
 import com.toast.xml.XmlNode;
 import com.toast.xml.exception.XmlFormatException;
 
 import jdk.nashorn.internal.runtime.regexp.joni.BitSet;
 
-public class Property implements Serializable
+public class Property implements Updatable, Serializable, Syncable
 {
    public static Property createProperty(XmlNode node)
    {
@@ -92,6 +94,16 @@ public class Property implements Serializable
    }
    
    // **************************************************************************
+   //                             Updatable interface   
+   
+   public void update(
+      long elapsedTime)
+   {
+      // Clear the change set.
+      changeSet.clear();
+   }
+   
+   // **************************************************************************
    //                         xml.Serializable interface
    
    /*
@@ -135,16 +147,24 @@ public class Property implements Serializable
       XmlNode propertyNode = node.appendChild(getNodeName());
       
       // id
-      propertyNode.setAttribute("id",  id);
+      propertyNode.setAttribute("id",  getId());
       
       return (propertyNode);
    }
    
    public void syncFrom(XmlNode node) throws XmlFormatException
    {
-      // Nothing to do here.
+      // Implementation left to subclasses.
    }
    
+   // **************************************************************************
+   //                                Protected
+   // **************************************************************************
+   
+   protected BitSet changeSet = new BitSet();
+   
+   // **************************************************************************
+   //                                 Private
    // **************************************************************************
    
    private void deserializeThis(XmlNode node) throws XmlFormatException
@@ -159,6 +179,4 @@ public class Property implements Serializable
    private String id;
    
    private Actor parent;
-   
-   private BitSet changeSet = new BitSet();
 }

@@ -9,6 +9,31 @@ import com.toast.xml.exception.XmlFormatException;
 
 public class Synchronize
 {
+   public static void syncronize()
+   {
+      Server server = Game.getServer();
+      Client client = Game.getClient();
+      
+      if ((server != null) || (client != null))
+      {
+         XmlDocument document = new XmlDocument();
+         
+         document.createRootNode("message");
+         document.getRootNode().setAttribute("messageId",  "sync");
+         
+         syncTo(document.getRootNode());
+         
+         if  (server != null)
+         {
+            server.broadcastData(document.toString());
+         }
+         else
+         {
+            client.sendData(document.toString());
+         }
+      }
+   }
+   
    public static void syncFrom(XmlNode node)
    {
       try
@@ -33,18 +58,6 @@ public class Synchronize
       {
          
       }
-   }
-   
-   public static void syncTo(Client client)
-   {
-      XmlDocument document = new XmlDocument();
-      
-      document.createRootNode("message");
-      document.getRootNode().setAttribute("messageId",  "sync");
-      
-      syncTo(document.getRootNode());
-      
-      client.sendData(document.toString());
    }
    
    public static void syncTo(XmlNode node)

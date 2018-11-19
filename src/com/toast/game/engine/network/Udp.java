@@ -5,6 +5,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.toast.xml.XmlDocument;
 import com.toast.xml.XmlNode;
@@ -28,13 +30,17 @@ public class Udp extends Thread
       {
          socket = new DatagramSocket(listenPort);
          
-         System.out.format("Udp::start(): Listening on port %d\n", listenPort);
+         logger.log(Level.INFO, 
+                    String.format("Listening on port %d.", 
+                                  listenPort));
          
          isStarted = true;
       }
       catch (SocketException e)
       {
-         System.out.format("Udp::start(): Failed to start server on port %d\n", listenPort);
+         logger.log(Level.WARNING, 
+                    String.format("Failed to open socket on port %d.", 
+                                  listenPort));
       }
       
       super.start();
@@ -43,6 +49,11 @@ public class Udp extends Thread
    public void end()
    {
       isStarted = false;
+   }
+   
+   public boolean isStarted()
+   {
+      return (isStarted);
    }
    
    public void sendData(InetAddress address, int port, String data)
@@ -59,7 +70,8 @@ public class Udp extends Thread
          }
          catch (IOException e)
          {
-            System.out.format("Failed to send packet.");
+            logger.log(Level.WARNING, 
+                       String.format("Failed to send data."));
          }
       }
    }
@@ -69,7 +81,7 @@ public class Udp extends Thread
       while (isStarted)
       {
          // Clear buffer before read.
-         buffer = new byte[1024];
+         buffer = new byte[4096];
 
          DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
          
@@ -122,7 +134,11 @@ public class Udp extends Thread
       }
       catch (XmlParseException e)
       {
-         System.out.format("Got packet from %s:%d: %s\n", address.toString(), port, data);
+         logger.log(Level.WARNING, 
+                    String.format("Got unknown data from %s:%d: %s",
+                                  address.toString(),
+                                  port,
+                                  data));
       }
    }
    
@@ -130,6 +146,8 @@ public class Udp extends Thread
    {
       // Implement.
    }
+   
+   private final static Logger logger = Logger.getLogger(Udp.class.getName());
    
    private static final int DEFAULT_LISTEN_PORT = 1975;
    

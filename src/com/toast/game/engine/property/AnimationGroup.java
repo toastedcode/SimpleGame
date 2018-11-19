@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.toast.game.engine.interfaces.Updatable;
 import com.toast.game.engine.interfaces.Drawable;
+import com.toast.game.engine.interfaces.Syncable;
 import com.toast.game.engine.property.Animation;
 import com.toast.game.engine.property.Animation.AnimationDirection;
 import com.toast.game.engine.property.Animation.AnimationType;
@@ -14,7 +15,7 @@ import com.toast.xml.XmlNode;
 import com.toast.xml.XmlNodeList;
 import com.toast.xml.exception.XmlFormatException;
 
-public class AnimationGroup extends Property implements Updatable, Drawable
+public class AnimationGroup extends Property implements Updatable, Drawable, Syncable
 {
    // **************************************************************************
    //                                 Public
@@ -51,11 +52,15 @@ public class AnimationGroup extends Property implements Updatable, Drawable
           (animationId.equals("")))
       {
          currentAnimation = null;
+         
+         changeSet.set(SyncableProperties.CURRENT_ANIMATION.ordinal());
       }
       else if (animations.containsKey(animationId) == true)
       {
          currentAnimation = animations.get(animationId);
          currentAnimation.start(animationType, animationDirection);
+         
+         changeSet.set(SyncableProperties.CURRENT_ANIMATION.ordinal());
       }
       else
       {
@@ -69,6 +74,8 @@ public class AnimationGroup extends Property implements Updatable, Drawable
    @Override
    public void update(long elapsedTime)
    {
+      super.update(elapsedTime);
+      
       if (currentAnimation != null)
       {
          currentAnimation.update(elapsedTime);
@@ -150,6 +157,81 @@ public class AnimationGroup extends Property implements Updatable, Drawable
    }
    
    // **************************************************************************
+   //                           Syncable interface
+   
+   public boolean isChanged()
+   {
+      boolean isChanged = !changeSet.isEmpty();
+      
+      for (Animation animation : animations.values())
+      {
+         isChanged |= animation.isChanged();
+      }
+      
+      return (isChanged);
+   }
+   
+   public XmlNode syncTo(XmlNode node)
+   {
+      XmlNode animationGroupNode = super.syncTo(node);
+      
+      // currentAnimation
+      if (changeSet.at(SyncableProperties.CURRENT_ANIMATION.ordinal()))
+      {
+         if (currentAnimation != null)
+         {
+            animationGroupNode.appendChild("currentAnimation").setAttribute("id", currentAnimation.getId());
+         }
+         else
+         {
+            animationGroupNode.appendChild("currentAnimation").setAttribute("id", "");
+         }
+      }
+      
+      for (Animation animation : animations.values())
+      {
+         if (animation.isChanged())
+         {
+            animation.syncTo(animationGroupNode);
+         }
+      }
+      
+      return (animationGroupNode);      
+   }
+   
+   public void syncFrom(XmlNode node) throws XmlFormatException
+   {
+      // animationDirection
+      if (node.hasChild("currentAnimation"))
+      {
+         String animationId = node.getChild("currentAnimation").getAttribute("id").getValue();
+         
+         if (animationId.isEmpty())
+         {
+            currentAnimation = null;
+         }
+         else
+         {
+            currentAnimation = animations.get(animationId);
+         }
+      }
+      
+      XmlNodeList animationNodes = node.getChildren("animation");
+      
+      for (XmlNode animationNode : animationNodes)
+      {
+         String animationId = animationNode.getAttribute("id").getValue();
+         
+         Animation animation = animations.get(animationId);
+         
+         if (animation != null)
+         {
+            animation.syncFrom(animationNode);
+         }
+      }
+   }
+   
+   // **************************************************************************
    //                                Protected
    // **************************************************************************
    
@@ -179,9 +261,14 @@ public class AnimationGroup extends Property implements Updatable, Drawable
       }
    }
    
-   Map<String, Animation> animations = new HashMap<>();
+   private enum SyncableProperties
+   {
+      CURRENT_ANIMATION
+   }
    
-   Animation currentAnimation = null;
+   private Map<String, Animation> animations = new HashMap<>();
+   
+   private Animation currentAnimation = null;
    
    private Dimension dimension = new Dimension();
 }

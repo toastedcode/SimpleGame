@@ -138,17 +138,24 @@ public class Animation extends Property implements Updatable, Drawable
    {
       this.animationType = animationType;
       this.animationDirection = animationDirection;
+      
+      changeSet.set(SyncableProperties.ANIMATION_TYPE.ordinal());
+      changeSet.set(SyncableProperties.ANIMATION_DIRECTION.ordinal());
    }
    
    public void pause()
    {
       animationType = AnimationType.NONE;
+      
+      changeSet.set(SyncableProperties.ANIMATION_TYPE.ordinal());
    }
    
    public void stop()
    {
       animationType = AnimationType.NONE;
       currentFrame = 0;
+      
+      changeSet.set(SyncableProperties.ANIMATION_TYPE.ordinal());
    }
    
    public AnimationType getAnimationType()
@@ -167,6 +174,8 @@ public class Animation extends Property implements Updatable, Drawable
    public void update(
       long elapsedTime)
    {
+      super.update(elapsedTime);
+      
       // Remember the current frame.
       int previousFrame = currentFrame;
       
@@ -307,6 +316,55 @@ public class Animation extends Property implements Updatable, Drawable
       super.deserialize(node);
       
       deserializeThis(node);
+   }
+   
+   // **************************************************************************
+   //                           Syncable interface
+   
+   public XmlNode syncTo(XmlNode node)
+   {
+      XmlNode animationNode = super.syncTo(node);
+      
+      // isVisible
+      if (changeSet.at(SyncableProperties.IS_VISIBLE.ordinal()))
+      {
+         animationNode.setAttribute("isVisible", isVisible );
+      }
+      
+      // animationDirection
+      if (changeSet.at(SyncableProperties.ANIMATION_DIRECTION.ordinal()))
+      {
+         animationNode.setAttribute("animationDirection", animationDirection.toString() );
+      }
+      
+      // animationType
+      if (changeSet.at(SyncableProperties.ANIMATION_TYPE.ordinal()))
+      {
+         animationNode.setAttribute("animationType", animationType.toString() );
+      }
+      
+      return (animationNode);      
+   }
+   
+   public void syncFrom(XmlNode node) throws XmlFormatException
+   {
+      // animationDirection
+      if (node.hasAttribute("animationDirection"))
+      {
+         animationDirection = AnimationDirection.valueOf(node.getAttribute("animationDirection").getValue());
+      }
+      
+      // animationType
+      if (node.hasAttribute("animationType"))
+      {
+         animationType = AnimationType.valueOf(node.getAttribute("animationType").getValue());
+      }
+      
+      // isVisible
+      if (node.hasAttribute("isVisible"))
+      {
+         isVisible = node.getAttribute("isVisible").getBoolValue();
+      }
    }
    
    // **************************************************************************
@@ -512,6 +570,13 @@ public class Animation extends Property implements Updatable, Drawable
    
    // A constant specifying the number of milliseconds in a second.
    private static final int MILLISECONDS_PER_SECOND = 1000;
+   
+   private enum SyncableProperties
+   {
+      ANIMATION_DIRECTION,
+      ANIMATION_TYPE,
+      IS_VISIBLE,
+   }
    
    private ImageResource imageResource = null;
    

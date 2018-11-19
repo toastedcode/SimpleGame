@@ -671,7 +671,7 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
             Property property = getProperty(propertyId);
             if (property != null)
             {
-               property.syncTo(childNode);
+               property.syncFrom(childNode);
             }
             else
             {

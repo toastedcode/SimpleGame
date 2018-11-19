@@ -265,10 +265,7 @@ public class Game
          
          CollisionManager.update(elapsedTime);
          
-         if (client != null)
-         {
-            Synchronize.syncTo(client);
-         }
+         Synchronize.syncronize();
       }
    }
    

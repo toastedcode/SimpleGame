@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.toast.xml.XmlDocument;
 import com.toast.xml.XmlNode;
@@ -24,13 +26,19 @@ public class Server extends Udp
       listeners.add(listener);
    }
    
+   public void broadcastData(String data)
+   {
+      for (ClientInfo client : clients.values())
+      {
+         sendData(client.address, client.port, data);
+      }
+   }
+   
    protected void handleMessage(InetAddress address, int port, XmlNode message)
    {
       try
       {
          String messageId = message.getAttribute("messageId").getValue();
-         
-         System.out.format("Got message: %s\n",  message.getAttribute("messageId").getValue());
          
          switch (messageId)
          {
@@ -60,7 +68,11 @@ public class Server extends Udp
       }
       catch (XmlFormatException e)
       {
-         System.out.format("Failed to parse XML message.\n");
+         logger.log(Level.INFO, 
+                    String.format("Invald message format from %s:%d: %s", 
+                                  address.toString(), 
+                                  port,
+                                  message.toString()));
       }
    }
    
@@ -89,6 +101,11 @@ public class Server extends Udp
       
       if (!clients.containsKey(clientId))
       {
+         logger.log(Level.INFO, 
+                    String.format("New client registered with server from %s:%d.", 
+                                  address.toString(), 
+                                  port));
+         
          String clientName = "";
          if (message.hasChild("name"))
          {
@@ -122,6 +139,8 @@ public class Server extends Udp
       
       sendData(clientInfo.address, clientInfo.port, document.toString());
    }
+   
+   private final static Logger logger = Logger.getLogger(Server.class.getName());
    
    private Map<Integer, ClientInfo> clients = new HashMap<>();
    
