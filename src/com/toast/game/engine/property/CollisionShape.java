@@ -7,12 +7,15 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 
+import com.toast.game.common.Vector2D;
 import com.toast.game.common.XmlUtils;
+import com.toast.game.engine.collision.Collidable;
+import com.toast.game.engine.collision.Collision;
 import com.toast.game.engine.interfaces.Drawable;
 import com.toast.xml.XmlNode;
 import com.toast.xml.exception.XmlFormatException;
 
-public class CollisionShape extends Property implements Drawable
+public class CollisionShape extends Property implements Drawable, Collidable
 {
    // **************************************************************************
    //                                Private
@@ -73,6 +76,46 @@ public class CollisionShape extends Property implements Drawable
    {
       return ((int)getBounds().getHeight());
    }
+
+   // **************************************************************************
+   //                            Collidable interface
+
+   @Override
+   public boolean isCollisionEnabled()
+   {
+      boolean isCollisionEnabled = isEnabled;
+      
+      if (getParent() != null)
+      {
+         isCollisionEnabled &= getParent().isCollisionEnabled();
+      }
+      
+      return (isCollisionEnabled);
+   }
+
+   @Override
+   public Shape getCollisionShape()
+   {
+      return (shape);
+   }
+
+   @Override
+   public void onCollision(Collision collision)
+   {
+      if (getParent() != null)
+      {
+         getParent().onCollision(collision);
+      }
+   }
+
+   @Override
+   public void onSeparation(Collidable collidable)
+   {
+      if (getParent() != null)
+      {
+         getParent().onSeparation(collidable);
+      }
+   }
    
    // **************************************************************************
    //                        xml.Serializable interface
@@ -80,7 +123,7 @@ public class CollisionShape extends Property implements Drawable
    /*
    <collision id="">
       <rectangle x="" y="" width="" height=""/>
-   </animation>
+   </collision>
    */
    
    @Override

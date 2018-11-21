@@ -10,8 +10,6 @@ public interface Collidable
 
    public Shape getCollisionShape();
    
-   public Vector2D getCollisionVector();
-   
    public void onCollision(Collision collision);
    
    public void onSeparation(Collidable collidable);

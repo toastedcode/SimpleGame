@@ -13,7 +13,6 @@ import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import com.toast.game.common.Vector2D;
 import com.toast.game.engine.collision.CollisionManager;
 import com.toast.game.engine.interfaces.Drawable;
 
@@ -41,12 +40,6 @@ public class CollisionManagerTest
       public Shape getCollisionShape()
       {
          return (rectangle);
-      }
-
-      @Override
-      public Vector2D getCollisionVector()
-      {
-         return (vector);
       }
 
       @Override
@@ -87,8 +80,6 @@ public class CollisionManagerTest
       }
       
       Rectangle2D.Double rectangle;
-      
-      Vector2D vector;
    }
    
    @SuppressWarnings("serial")

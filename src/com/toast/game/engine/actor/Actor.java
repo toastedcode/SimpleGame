@@ -15,7 +15,6 @@ import com.toast.game.engine.interfaces.Updatable;
 import com.toast.game.engine.message.Message;
 import com.toast.game.engine.message.MessageHandler;
 import com.toast.game.engine.message.Messenger;
-import com.toast.game.engine.property.CollisionShape;
 import com.toast.game.engine.property.Mailbox;
 import com.toast.game.engine.property.Physics;
 import com.toast.game.engine.property.Property;
@@ -31,6 +30,7 @@ import jdk.nashorn.internal.runtime.regexp.joni.BitSet;
 import java.awt.Dimension;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.lang.reflect.InvocationTargetException;
@@ -182,6 +182,14 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
                   (center.getY() - (getHeight() / 2)));
    }
    
+   public Point2D.Double getHead()
+   {
+      Point2D.Double position = getPosition();
+      
+      return (new Point2D.Double((position.getX() + (getWidth() / 2)), 
+                                 position.getY()));
+   }
+   
    public Point2D.Double getFoot()
    {
       Point2D.Double position = getPosition();
@@ -321,12 +329,6 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
           (property instanceof MessageHandler))
       {
          mailbox.register((MessageHandler)property);
-      }
-      
-      if (property instanceof CollisionShape)
-      {
-         collisionShape = (CollisionShape)property;
-         CollisionManager.register(this);
       }
    }
    
@@ -471,25 +473,33 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
    @Override
    public boolean isCollisionEnabled()
    {
-      return ((collisionShape != null) && isCollisionEnabled);
+      return (isCollisionEnabled);
    }
 
    @Override
    public Shape getCollisionShape()
    {
+      Area collisionShape = new Area();
+      
+      // Combine all enabled Collidable property collision shapes.
+      for (Property property : properties.values())
+      {
+         if ((property instanceof Collidable) &&
+             ((Collidable)property).isCollisionEnabled())
+         {
+            Shape componentShape = ((Collidable)property).getCollisionShape();  
+            
+            collisionShape.add(new Area(componentShape));
+         }
+      }
+
       AffineTransform transform = getTransform();
-      Shape transformedShape = transform.createTransformedShape(collisionShape.getShape());
+      Shape transformedShape = transform.createTransformedShape(collisionShape);
       
       return (transformedShape);
    }
-
-   @Override
-   public Vector2D getCollisionVector()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
    
+   @Override
    public void onCollision(Collision collision)
    {
       System.out.format("%s collided with %s\n", this.getId(), ((Actor)(collision.getOther(this))).getId());
@@ -503,6 +513,7 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
       }
    }
    
+   @Override
    public void onSeparation(Collidable collided)
    {
       System.out.format("%s separated from %s\n", this.getId(), ((Actor)(collided)).getId());
@@ -702,7 +713,7 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
    
    private void addCollidable(Collidable collidable)
    {
-      CollisionManager.register(collidable);
+      CollisionManager.register(this);
    }
    
    private void addMailbox(Mailbox mailbox)
@@ -805,8 +816,6 @@ public class Actor implements Updatable, Movable, Mailable, Serializable, Collid
    private Physics physics = null;
    
    private boolean isCollisionEnabled = true;
-   
-   private CollisionShape collisionShape = null;
    
    private BitSet changeSet = new BitSet();
 }

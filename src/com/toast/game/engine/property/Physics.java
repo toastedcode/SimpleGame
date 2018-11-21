@@ -1,6 +1,7 @@
 package com.toast.game.engine.property;
 
 import java.awt.Rectangle;
+import java.awt.geom.Point2D;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -165,6 +166,14 @@ public class Physics extends Property implements Updatable, CollisionHandler
       
       // Resolve collision.
       resolveCollision(collision);
+      
+      // TODO: Calculate grounded!!!
+      Point2D.Double foot = actor.getFoot();
+      Point2D.Double head = collidedActor.getFoot();
+      if (actor.getFoot().y < collidedActor.getHead().y)
+      {
+         System.out.format("%s is grounded on %s\n",  actor.getId(), collidedActor.getId());
+      }
       
       // Adjust velocity.
       velocity.x = 0;
