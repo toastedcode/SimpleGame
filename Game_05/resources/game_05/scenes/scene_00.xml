@@ -29,7 +29,7 @@
 	         <physics id="physics">
 	            <isEnabled>true</isEnabled>
 	            <velocity x="0" y="0"/>
-	            <gravity x="0" y="800"/>
+	            <gravity x="0" y="400"/>
 	         </physics>
 	         <keyMap id="keyMap">
 	            <key keyId="32" messageId="msgJUMP"/>

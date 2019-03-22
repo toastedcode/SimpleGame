@@ -28,7 +28,6 @@ public void handleMessage()
       case "msgDOWN":
       case "msgJUMP":
       {
-         print("here");
          handleKeyUpdate(message.getMessageId(), Boolean.valueOf(message.getPayload("isKeyPressed")));
          break;
       }

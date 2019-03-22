@@ -83,6 +83,7 @@ public class Physics extends Property implements Updatable, CollisionHandler
    public void addVelocity(Vector2D velocity)
    {
       this.velocity = Vector2D.add(this.velocity, velocity);
+      groundedOn = null;
    }
 
    public Vector2D getAcceleration()
@@ -168,11 +169,13 @@ public class Physics extends Property implements Updatable, CollisionHandler
       resolveCollision(collision);
       
       // TODO: Calculate grounded!!!
-      Point2D.Double foot = actor.getFoot();
-      Point2D.Double head = collidedActor.getFoot();
-      if (actor.getFoot().y < collidedActor.getHead().y)
+      Rectangle actorRect = actor.getCollisionShape().getBounds();
+      Rectangle collidedRect = collidedActor.getCollisionShape().getBounds();
+
+      if ((actorRect.y + actorRect.height) <= collidedRect.y)
       {
          System.out.format("%s is grounded on %s\n",  actor.getId(), collidedActor.getId());
+         groundedOn = collidedActor;
       }
       
       // Adjust velocity.
@@ -202,8 +205,11 @@ public class Physics extends Property implements Updatable, CollisionHandler
       //velocity.
       
       // Apply gravity.
-      velocity.x += (gravity.x * elapsedSeconds);  
-      velocity.y += (gravity.y * elapsedSeconds);
+      if (groundedOn == null)  // TODO: Experimental
+      {
+         velocity.x += (gravity.x * elapsedSeconds);  
+         velocity.y += (gravity.y * elapsedSeconds);
+      }
       
       // Apply drag.
       velocity.x += velocity.x * -1.0 * (drag * elapsedSeconds);
@@ -445,4 +451,7 @@ public class Physics extends Property implements Updatable, CollisionHandler
    private double viscosity;
    
    private Map<Actor, Collision> collisions = new HashMap<>();
+   
+   // Experimental
+   Actor groundedOn = null;
 }
